@@ -160,6 +160,28 @@
   }
   tr:hover td { background: rgba(59,130,246,0.04); }
   tr:last-child td { border-bottom: none; }
+  tr.warn-yellow td { background: rgba(245,158,11,0.12); }
+  tr.warn-yellow:hover td { background: rgba(245,158,11,0.18); }
+  tr.warn-red td { background: rgba(239,68,68,0.14); }
+  tr.warn-red:hover td { background: rgba(239,68,68,0.22); }
+  .overdue-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; margin-left: 6px;
+  }
+  .overdue-tag.yellow { background: rgba(245,158,11,0.2); color: var(--warn); }
+  .overdue-tag.red { background: rgba(239,68,68,0.2); color: var(--danger); }
+
+  /* ─── INLINE EDITABLE DATE ─── */
+  .date-input-inline {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 8px; color: var(--text);
+    font-size: 13px; font-family: inherit; width: 130px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .date-input-inline:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
 
   /* ─── LEVEL BADGES ─── */
   .badge {
@@ -758,14 +780,42 @@ function renderWorklog() {
   }
   empty.classList.add('hidden');
 
-  tbody.innerHTML = orders.map((o, i) => `
-    <tr>
-      <td style="font-weight:700; color:var(--accent)">${o.workId}</td>
+  const now = new Date();
+  now.setHours(0,0,0,0);
+
+  tbody.innerHTML = orders.map((o, i) => {
+    const endDate = new Date(o.endDate);
+    endDate.setHours(0,0,0,0);
+    const diffDays = Math.floor((now - endDate) / 86400000);
+
+    // 判斷警示等級：未完工且超過結束日期
+    let rowClass = '';
+    let overdueTag = '';
+
+    if (!o.completed) {
+      if (diffDays > 14) {
+        rowClass = 'warn-red';
+        overdueTag = `<span class="overdue-tag red">逾期 ${diffDays} 天</span>`;
+      } else if (diffDays > 7 && !o.report) {
+        rowClass = 'warn-yellow';
+        overdueTag = `<span class="overdue-tag yellow">逾期 ${diffDays} 天</span>`;
+      }
+    }
+
+    return `
+    <tr class="${rowClass}">
+      <td style="font-weight:700; color:var(--accent)">${o.workId}${overdueTag}</td>
       <td>${o.projectName}</td>
       <td><span class="badge badge-2">${o.method}</span></td>
       <td>${o.personnel.join('、')}</td>
-      <td>${o.startDate}</td>
-      <td>${o.endDate}</td>
+      <td>
+        <input type="date" class="date-input-inline" value="${o.startDate}"
+               onchange="updateOrderDate(${i},'startDate',this.value)">
+      </td>
+      <td>
+        <input type="date" class="date-input-inline" value="${o.endDate}"
+               onchange="updateOrderDate(${i},'endDate',this.value)">
+      </td>
       <td style="text-align:center; font-weight:700">${o.manDays}</td>
       <td class="check-cell">
         <input type="checkbox" ${o.processControl ? 'checked' : ''} 
@@ -782,8 +832,22 @@ function renderWorklog() {
       <td>
         <button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
+}
+
+function updateOrderDate(index, field, value) {
+  const orders = loadWorkOrders();
+  orders[index][field] = value;
+  // 重新計算人日數
+  const o = orders[index];
+  const start = new Date(o.startDate);
+  const end = new Date(o.endDate);
+  const days = Math.max(1, Math.ceil((end - start) / 86400000) + 1);
+  o.manDays = days * (o.personnel ? o.personnel.length : 1);
+  saveWorkOrders(orders);
+  renderWorklog();
+  showToast('日期已更新');
 }
 
 function updateOrderField(index, field, value) {
