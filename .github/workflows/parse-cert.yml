@@ -1,0 +1,55 @@
+name: Parse Certification PDF
+
+on:
+  push:
+    paths:
+      - 'data/*.pdf'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  parse-pdf:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pdfplumber
+
+      - name: Find and parse PDF
+        run: |
+          PDF_FILE=$(ls -t data/*.pdf 2>/dev/null | head -1)
+          
+          if [ -z "$PDF_FILE" ]; then
+            echo "❌ 在 data/ 資料夾中找不到 PDF 檔案"
+            exit 1
+          fi
+          
+          echo "📄 解析: $PDF_FILE"
+          python scripts/parse_cert_pdf.py "$PDF_FILE" data/personnel.json
+
+      - name: Update index.html with new data
+        run: python scripts/update_frontend.py data/personnel.json index.html
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/personnel.json index.html
+          
+          if git diff --staged --quiet; then
+            echo "✅ 資料無變更，跳過 commit"
+          else
+            git commit -m "🔄 自動更新人員證照資料 $(date +'%Y-%m-%d %H:%M')"
+            git push
+            echo "✅ 已更新並推送變更"
+          fi
