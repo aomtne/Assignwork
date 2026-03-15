@@ -344,6 +344,24 @@
     font-size: 14px; font-family: inherit; width: 200px;
   }
   .search-input:focus { outline: none; border-color: var(--accent); }
+
+  /* ─── METHOD CHIPS ─── */
+  .method-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--border);
+    font-size: 13px; font-weight: 500; color: var(--text-dim);
+    transition: all 0.2s; user-select: none;
+  }
+  .method-chip:hover { border-color: var(--border-light); color: var(--text); }
+  .method-chip:has(input:checked) {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(59,130,246,0.1);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .method-chip input[type="checkbox"] {
+    accent-color: var(--accent); width: 14px; height: 14px;
+  }
 </style>
 </head>
 <body>
@@ -404,17 +422,16 @@
         <input type="text" id="inp-projectName" placeholder="例：#1鍋爐水牆管檢測">
       </div>
       <div class="form-group">
-        <label>檢測方法</label>
-        <select id="inp-method">
-          <option value="">— 選擇檢測方法 —</option>
-          <option value="PT">PT 滲透檢測</option>
-          <option value="MT">MT 磁粒檢測</option>
-          <option value="UT">UT 超音波檢測</option>
-          <option value="ET">ET 電磁檢測</option>
-          <option value="RT">RT 射線檢測</option>
-          <option value="VT">VT 目視檢測</option>
-          <option value="LT">LT 洩漏檢測</option>
-        </select>
+        <label>檢測方法（可複選 1~4 種）</label>
+        <div id="method-checkboxes" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+          <label class="method-chip"><input type="checkbox" value="PT" onchange="onMethodChange()"> PT 滲透</label>
+          <label class="method-chip"><input type="checkbox" value="MT" onchange="onMethodChange()"> MT 磁粒</label>
+          <label class="method-chip"><input type="checkbox" value="UT" onchange="onMethodChange()"> UT 超音波</label>
+          <label class="method-chip"><input type="checkbox" value="ET" onchange="onMethodChange()"> ET 電磁</label>
+          <label class="method-chip"><input type="checkbox" value="RT" onchange="onMethodChange()"> RT 射線</label>
+          <label class="method-chip"><input type="checkbox" value="VT" onchange="onMethodChange()"> VT 目視</label>
+          <label class="method-chip"><input type="checkbox" value="LT" onchange="onMethodChange()"> LT 洩漏</label>
+        </div>
       </div>
       <div class="form-group">
         <label>需求人數</label>
@@ -687,28 +704,49 @@ function renderCertTable() {
 // ═══ PERSONNEL SELECTION GRID ═══
 let selectedPersonnel = new Set();
 
+function getSelectedMethods() {
+  return [...document.querySelectorAll('#method-checkboxes input:checked')].map(cb => cb.value);
+}
+
+function onMethodChange() {
+  const methods = getSelectedMethods();
+  if (methods.length > 4) {
+    event.target.checked = false;
+    showToast('最多選擇 4 種檢測方法', 'warn');
+    return;
+  }
+  generateSuggestion();
+  renderPersonnelGrid();
+}
+
 function renderPersonnelGrid() {
-  const method = document.getElementById('inp-method').value;
+  const methods = getSelectedMethods();
   const search = document.getElementById('personnel-search').value.trim();
   const grid = document.getElementById('personnel-grid');
 
   grid.innerHTML = personnelData.map(p => {
-    const level = method ? p[method] : null;
-    const disabled = method && level === 0;
     const matchSearch = !search || p.name.includes(search);
     if (!matchSearch) return '';
 
-    const levelText = method 
-      ? `Level ${level === 3 ? 'III' : level === 2 ? 'II' : level === 1 ? 'I' : '—'}`
-      : '';
-    const badgeClass = method ? `badge badge-${level}` : '';
+    // 人員需要在所有選定方法中至少有 Level 1
+    let disabled = false;
+    let levelInfo = '';
+    if (methods.length > 0) {
+      const allZero = methods.every(m => p[m] === 0);
+      disabled = allZero;
+      levelInfo = methods.map(m => {
+        const lv = p[m];
+        const label = lv === 3 ? 'III' : lv === 2 ? 'II' : lv === 1 ? 'I' : '—';
+        return `<span class="badge badge-${lv}" style="font-size:10px;padding:1px 6px;">${m}:${label}</span>`;
+      }).join(' ');
+    }
 
     return `
       <div class="personnel-item ${selectedPersonnel.has(p.id) ? 'selected' : ''} ${disabled ? 'disabled' : ''}"
            onclick="togglePerson(${p.id})">
         <input type="checkbox" ${selectedPersonnel.has(p.id) ? 'checked' : ''} ${disabled ? 'disabled' : ''}>
         <span class="name">${p.name}</span>
-        ${levelText ? `<span class="level ${badgeClass}">${levelText}</span>` : ''}
+        <span class="level" style="display:flex;gap:3px;flex-wrap:wrap;">${levelInfo}</span>
       </div>
     `;
   }).join('');
@@ -723,44 +761,70 @@ function togglePerson(id) {
 }
 
 // ═══ SUGGESTION ENGINE ═══
+function getPersonnelSupportCounts() {
+  // 計算每位人員的總支援次數（當年度）
+  const orders = loadWorkOrders();
+  const currentYear = new Date().getFullYear();
+  const filtered = orders.filter(o => (o.year || new Date(o.startDate).getFullYear()) === currentYear);
+  const counts = {};
+  personnelData.forEach(p => counts[p.name] = 0);
+  filtered.forEach(o => {
+    (o.personnel || []).forEach(name => {
+      if (counts[name] !== undefined) counts[name]++;
+    });
+  });
+  return counts;
+}
+
 function generateSuggestion() {
-  const method = document.getElementById('inp-method').value;
+  const methods = getSelectedMethods();
   const count = parseInt(document.getElementById('inp-count').value) || 3;
   const box = document.getElementById('suggestion-box');
   const list = document.getElementById('suggestion-list');
 
-  if (!method) { box.classList.add('hidden'); return; }
+  if (methods.length === 0) { box.classList.add('hidden'); return; }
 
-  // Sort: Level III first, then II, then I; within same level, by id (seniority)
-  const qualified = personnelData
-    .filter(p => p[method] >= 1)
-    .sort((a, b) => b[method] - a[method] || a.id - b.id);
+  const supportCounts = getPersonnelSupportCounts();
 
-  const level2plus = qualified.filter(p => p[method] >= 2);
-  const level1 = qualified.filter(p => p[method] === 1);
+  // 判定每人對所有選定方法的最低級數（取最低者作為整體資格）
+  const withMinLevel = personnelData.map(p => {
+    const minLevel = Math.min(...methods.map(m => p[m]));
+    return { ...p, minLevel, supportCount: supportCounts[p.name] || 0 };
+  });
+
+  // 篩選：至少所有方法都 >= 1
+  const qualified = withMinLevel.filter(p => p.minLevel >= 1);
+
+  // 排序邏輯：
+  // 1. Level II+ 優先（確保有帶隊人員）
+  // 2. 同級數中，支援次數少的優先（均衡派工）
+  // 3. 次數相同時，級數高的優先
+  const level2plus = qualified
+    .filter(p => p.minLevel >= 2)
+    .sort((a, b) => a.supportCount - b.supportCount || b.minLevel - a.minLevel);
+
+  const level1 = qualified
+    .filter(p => p.minLevel === 1)
+    .sort((a, b) => a.supportCount - b.supportCount);
 
   let suggested = [];
-  
-  // Ensure at least one Level II+ lead
   if (count <= level2plus.length) {
     suggested = level2plus.slice(0, count);
   } else {
-    // All Level II+ plus fill with Level I
     suggested = [...level2plus, ...level1.slice(0, count - level2plus.length)];
   }
-
   suggested = suggested.slice(0, count);
 
   if (suggested.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-muted)">無符合資格人員</p>';
+    list.innerHTML = '<p style="color:var(--text-muted)">無同時符合所有檢測方法資格的人員</p>';
   } else {
-    const hasLead = suggested.some(p => p[method] >= 2);
+    const hasLead = suggested.some(p => p.minLevel >= 2);
     list.innerHTML = suggested.map(p => {
-      const lv = p[method];
-      const cls = lv === 3 ? 'badge-3' : lv === 2 ? 'badge-2' : 'badge-1';
-      const label = lv === 3 ? 'III' : lv === 2 ? 'II' : 'I';
+      const cls = p.minLevel === 3 ? 'badge-3' : p.minLevel === 2 ? 'badge-2' : 'badge-1';
+      const label = p.minLevel === 3 ? 'III' : p.minLevel === 2 ? 'II' : 'I';
       return `<span class="suggestion-tag">
         <span class="badge ${cls}">${label}</span> ${p.name}
+        <span style="font-size:11px;color:var(--text-muted);margin-left:2px;">(${p.supportCount}次)</span>
       </span>`;
     }).join('');
 
@@ -778,10 +842,6 @@ function generateSuggestion() {
 }
 
 // ═══ EVENT LISTENERS ═══
-document.getElementById('inp-method').addEventListener('change', () => {
-  generateSuggestion();
-  renderPersonnelGrid();
-});
 document.getElementById('inp-count').addEventListener('input', generateSuggestion);
 document.getElementById('personnel-search').addEventListener('input', renderPersonnelGrid);
 
@@ -789,12 +849,12 @@ document.getElementById('personnel-search').addEventListener('input', renderPers
 function submitDispatch() {
   const workId = document.getElementById('inp-workId').value.trim();
   const projectName = document.getElementById('inp-projectName').value.trim();
-  const method = document.getElementById('inp-method').value;
+  const methods = getSelectedMethods();
   const startDate = document.getElementById('inp-startDate').value;
   const endDate = document.getElementById('inp-endDate').value;
 
-  if (!workId || !projectName || !method || !startDate || !endDate) {
-    showToast('請填寫所有必填欄位', 'warn');
+  if (!workId || !projectName || methods.length === 0 || !startDate || !endDate) {
+    showToast('請填寫所有必填欄位（含至少一種檢測方法）', 'warn');
     return;
   }
   if (selectedPersonnel.size === 0) {
@@ -802,16 +862,19 @@ function submitDispatch() {
     return;
   }
 
-  // Check: at least one Level II+
+  // Check: at least one Level II+ across all methods
   const selected = personnelData.filter(p => selectedPersonnel.has(p.id));
-  const hasLead = selected.some(p => p[method] >= 2);
+  const hasLead = selected.some(p => methods.every(m => p[m] >= 2));
   if (!hasLead) {
-    showToast('⚠ 至少需要一位 Level II 以上人員帶領', 'warn');
-    return;
+    // 退一步：至少有人在任一方法是 Level II+
+    const hasAnyLead = selected.some(p => methods.some(m => p[m] >= 2));
+    if (!hasAnyLead) {
+      showToast('⚠ 至少需要一位 Level II 以上人員帶領', 'warn');
+      return;
+    }
   }
 
   const orders = loadWorkOrders();
-  // Check duplicate workId
   if (orders.find(o => o.workId === workId)) {
     showToast('此工號已存在', 'warn');
     return;
@@ -826,7 +889,8 @@ function submitDispatch() {
   orders.push({
     workId,
     projectName,
-    method,
+    method: methods.join('+'),
+    methods: methods,
     personnel: names,
     personnelIds: [...selectedPersonnel],
     startDate,
@@ -839,14 +903,14 @@ function submitDispatch() {
   });
 
   saveWorkOrders(orders);
-  showToast(`工號 ${workId} 派工完成！已派 ${names.length} 人`);
+  showToast(`工號 ${workId} 派工完成！已派 ${names.length} 人，${methods.join('+')} 檢測`);
   clearForm();
 }
 
 function clearForm() {
   document.getElementById('inp-workId').value = '';
   document.getElementById('inp-projectName').value = '';
-  document.getElementById('inp-method').value = '';
+  document.querySelectorAll('#method-checkboxes input').forEach(cb => cb.checked = false);
   document.getElementById('inp-count').value = '3';
   document.getElementById('inp-startDate').value = '';
   document.getElementById('inp-endDate').value = '';
@@ -977,8 +1041,14 @@ function renderStats() {
   });
 
   filtered.forEach(o => {
+    // 支援多方法：methods 陣列或舊格式 method 字串
+    const orderMethods = o.methods || (o.method ? o.method.split('+') : []);
     (o.personnel || []).forEach(name => {
-      if (counts[name]) counts[name][o.method] = (counts[name][o.method] || 0) + 1;
+      if (counts[name]) {
+        orderMethods.forEach(m => {
+          if (counts[name][m] !== undefined) counts[name][m]++;
+        });
+      }
     });
   });
 
