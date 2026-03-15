@@ -357,7 +357,33 @@
     <button class="nav-tab" onclick="showPage('stats')">📈 支援統計</button>
     <button class="nav-tab" onclick="showPage('personnel')">👤 人員證照</button>
   </div>
+  <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+    <span id="admin-badge" class="hidden" style="font-size:11px; background:rgba(16,185,129,0.15); color:var(--success); padding:3px 10px; border-radius:20px; font-weight:600;">🔓 管理員</span>
+    <button id="admin-login-btn" class="btn btn-secondary btn-sm" onclick="showAuthModal()">🔒 管理登入</button>
+    <button id="admin-logout-btn" class="btn btn-secondary btn-sm hidden" onclick="adminLogout()">登出</button>
+  </div>
 </nav>
+
+<!-- ═══ AUTH MODAL ═══ -->
+<div class="modal-overlay hidden" id="auth-modal" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="modal">
+    <h2>🔐 管理員登入</h2>
+    <p style="font-size:13px; color:var(--text-dim); margin-bottom:16px;">修改日期與刪除工單需要管理員權限</p>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>代號</label>
+      <input type="text" id="auth-uid" placeholder="請輸入代號" autocomplete="off">
+    </div>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label>密碼</label>
+      <input type="password" id="auth-pwd" placeholder="請輸入密碼" autocomplete="off"
+             onkeydown="if(event.key==='Enter')adminLogin()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('auth-modal').classList.add('hidden')">取消</button>
+      <button class="btn btn-primary" onclick="adminLogin()">登入</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ PAGE: 派工作業 ═══ -->
 <div class="main" id="page-dispatch">
@@ -565,6 +591,68 @@ function loadWorkOrders() {
 }
 function saveWorkOrders(data) {
   localStorage.setItem('ndt_workorders', JSON.stringify(data));
+}
+
+// ═══ AUTH (管理員權限) ═══
+const AUTH_HASH = '5caaa946305e4ebb2aa470040afd76a212c04b53cc58a54fb34b5c2e081d06cb';
+let isAdmin = false;
+
+async function sha256(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function adminLogin() {
+  const uid = document.getElementById('auth-uid').value.trim();
+  const pwd = document.getElementById('auth-pwd').value.trim();
+  if (!uid || !pwd) { showToast('請輸入代號與密碼', 'warn'); return; }
+  const hash = await sha256(uid + ':' + pwd);
+  if (hash === AUTH_HASH) {
+    isAdmin = true;
+    sessionStorage.setItem('ndt_admin', '1');
+    document.getElementById('auth-modal').classList.add('hidden');
+    showToast('✅ 管理員登入成功');
+    updateAdminUI();
+  } else {
+    showToast('代號或密碼錯誤', 'warn');
+  }
+}
+
+function adminLogout() {
+  isAdmin = false;
+  sessionStorage.removeItem('ndt_admin');
+  showToast('已登出管理員');
+  updateAdminUI();
+  if (!document.getElementById('page-worklog').classList.contains('hidden')) renderWorklog();
+}
+
+function showAuthModal() {
+  document.getElementById('auth-uid').value = '';
+  document.getElementById('auth-pwd').value = '';
+  document.getElementById('auth-modal').classList.remove('hidden');
+}
+
+function checkAdminSession() {
+  if (sessionStorage.getItem('ndt_admin') === '1') isAdmin = true;
+}
+
+function updateAdminUI() {
+  const loginBtn = document.getElementById('admin-login-btn');
+  const logoutBtn = document.getElementById('admin-logout-btn');
+  const badge = document.getElementById('admin-badge');
+  if (isAdmin) {
+    loginBtn.classList.add('hidden');
+    logoutBtn.classList.remove('hidden');
+    badge.classList.remove('hidden');
+  } else {
+    loginBtn.classList.remove('hidden');
+    logoutBtn.classList.add('hidden');
+    badge.classList.add('hidden');
+  }
+  // Re-render worklog if visible
+  if (!document.getElementById('page-worklog').classList.contains('hidden')) renderWorklog();
 }
 
 // ═══ PAGE SWITCHING ═══
@@ -808,14 +896,14 @@ function renderWorklog() {
       <td>${o.projectName}</td>
       <td><span class="badge badge-2">${o.method}</span></td>
       <td>${o.personnel.join('、')}</td>
-      <td>
-        <input type="date" class="date-input-inline" value="${o.startDate}"
-               onchange="updateOrderDate(${i},'startDate',this.value)">
-      </td>
-      <td>
-        <input type="date" class="date-input-inline" value="${o.endDate}"
-               onchange="updateOrderDate(${i},'endDate',this.value)">
-      </td>
+      <td>${isAdmin
+        ? `<input type="date" class="date-input-inline" value="${o.startDate}"
+               onchange="updateOrderDate(${i},'startDate',this.value)">`
+        : o.startDate}</td>
+      <td>${isAdmin
+        ? `<input type="date" class="date-input-inline" value="${o.endDate}"
+               onchange="updateOrderDate(${i},'endDate',this.value)">`
+        : o.endDate}</td>
       <td style="text-align:center; font-weight:700">${o.manDays}</td>
       <td class="check-cell">
         <input type="checkbox" ${o.processControl ? 'checked' : ''} 
@@ -829,9 +917,9 @@ function renderWorklog() {
         <input type="checkbox" ${o.completed ? 'checked' : ''} 
                onchange="updateOrderField(${i},'completed',this.checked)">
       </td>
-      <td>
-        <button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>
-      </td>
+      <td>${isAdmin
+        ? `<button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>`
+        : `<span style="color:var(--text-muted); font-size:12px;">—</span>`}</td>
     </tr>`;
   }).join('');
 }
@@ -946,6 +1034,8 @@ function init() {
   const nextWeek = new Date(today.getTime() + 7 * 86400000);
   document.getElementById('inp-endDate').value = nextWeek.toISOString().slice(0, 10);
 
+  checkAdminSession();
+  updateAdminUI();
   renderPersonnelGrid();
   renderCertTable();
 }
