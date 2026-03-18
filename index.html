@@ -422,11 +422,35 @@
     <button class="nav-tab" onclick="showPage('personnel')">👤 人員證照</button>
   </div>
   <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+    <button class="btn btn-secondary btn-sm" onclick="showSyncSettings()" title="Google Sheets 設定">☁ Sheets</button>
     <span id="admin-badge" class="hidden" style="font-size:11px; background:rgba(16,185,129,0.15); color:var(--success); padding:3px 10px; border-radius:20px; font-weight:600;">🔓 管理員</span>
     <button id="admin-login-btn" class="btn btn-secondary btn-sm" onclick="showAuthModal()">🔒 管理登入</button>
     <button id="admin-logout-btn" class="btn btn-secondary btn-sm hidden" onclick="adminLogout()">登出</button>
   </div>
 </nav>
+
+<!-- ═══ SYNC SETTINGS MODAL ═══ -->
+<div class="modal-overlay hidden" id="sync-modal" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="modal">
+    <h2>☁ Google Sheets 同步設定</h2>
+    <p style="font-size:13px; color:var(--text-dim); margin-bottom:16px;">
+      將派工資料同步到 Google Sheets，換電腦也不會遺失。
+    </p>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label>Apps Script Web App URL</label>
+      <input type="text" id="sync-url-input" placeholder="https://script.google.com/macros/s/xxxxx/exec" 
+             style="width:100%; font-size:12px;">
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+      <button class="btn btn-secondary btn-sm" onclick="manualSyncFromSheet()">⬇ 從 Sheets 載入</button>
+      <button class="btn btn-secondary btn-sm" onclick="manualPushToSheet()">⬆ 上傳至 Sheets</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('sync-modal').classList.add('hidden')">取消</button>
+      <button class="btn btn-primary" onclick="saveSyncSettings()">儲存設定</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ AUTH MODAL ═══ -->
 <div class="modal-overlay hidden" id="auth-modal" onclick="if(event.target===this)this.classList.add('hidden')">
@@ -662,12 +686,114 @@ let personnelData = [
   {id:30,name:"陳廉淞",PT:1,MT:1,UT:0,ET:1,RT:0,VT:1,LT:0}
 ];
 
-// ═══ PERSISTENCE (localStorage) ═══
+// ═══ PERSISTENCE (Google Sheets + localStorage cache) ═══
+// 請將此 URL 替換為你的 Google Apps Script Web App URL
+const GAS_URL = localStorage.getItem('ndt_gas_url') || '';
+
+// localStorage 作為快取，Google Sheets 作為主要儲存
 function loadWorkOrders() {
   try { return JSON.parse(localStorage.getItem('ndt_workorders') || '[]'); } catch { return []; }
 }
 function saveWorkOrders(data) {
   localStorage.setItem('ndt_workorders', JSON.stringify(data));
+  syncToSheet(data);  // 非同步寫入 Google Sheets
+}
+
+// ─── 同步到 Google Sheets ───
+let syncTimer = null;
+function syncToSheet(data) {
+  if (!getGasUrl()) return;
+  // Debounce: 連續操作只送最後一次（1.5秒後）
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    fetch(getGasUrl(), {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'save', data: data })
+    }).catch(err => console.warn('Sheets sync failed:', err));
+  }, 1500);
+}
+
+// ─── 從 Google Sheets 載入 ───
+async function loadFromSheet() {
+  if (!getGasUrl()) return null;
+  try {
+    showToast('☁ 正在從 Google Sheets 載入...');
+    const res = await fetch(getGasUrl() + '?action=load');
+    const json = await res.json();
+    if (json.status === 'ok' && Array.isArray(json.data)) {
+      localStorage.setItem('ndt_workorders', JSON.stringify(json.data));
+      showToast(`✅ 已從 Sheets 載入 ${json.data.length} 筆工單`);
+      return json.data;
+    }
+  } catch (err) {
+    console.warn('Load from Sheets failed:', err);
+    showToast('⚠ 無法連線 Sheets，使用本地快取', 'warn');
+  }
+  return null;
+}
+
+function getGasUrl() {
+  return localStorage.getItem('ndt_gas_url') || '';
+}
+
+function saveGasUrl(url) {
+  localStorage.setItem('ndt_gas_url', url.trim());
+}
+
+// ─── 設定面板 ───
+function showSyncSettings() {
+  document.getElementById('sync-url-input').value = getGasUrl();
+  document.getElementById('sync-modal').classList.remove('hidden');
+}
+
+async function saveSyncSettings() {
+  const url = document.getElementById('sync-url-input').value.trim();
+  saveGasUrl(url);
+  document.getElementById('sync-modal').classList.add('hidden');
+  if (url) {
+    const data = await loadFromSheet();
+    if (data) {
+      // 重新渲染當前頁面
+      const visiblePage = document.querySelector('.main:not(.hidden)');
+      if (visiblePage) {
+        if (visiblePage.id === 'page-worklog') renderWorklog();
+        if (visiblePage.id === 'page-stats') renderStats();
+      }
+    }
+    showToast('✅ Google Sheets 連線設定已儲存');
+  } else {
+    showToast('已清除 Sheets 連線（僅使用本地儲存）');
+  }
+}
+
+async function manualSyncFromSheet() {
+  const data = await loadFromSheet();
+  if (data) {
+    const visiblePage = document.querySelector('.main:not(.hidden)');
+    if (visiblePage) {
+      if (visiblePage.id === 'page-worklog') renderWorklog();
+      if (visiblePage.id === 'page-stats') renderStats();
+    }
+  }
+}
+
+async function manualPushToSheet() {
+  if (!getGasUrl()) { showToast('請先設定 Google Sheets URL', 'warn'); return; }
+  const data = loadWorkOrders();
+  try {
+    showToast('☁ 正在上傳至 Google Sheets...');
+    await fetch(getGasUrl(), {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'save', data: data })
+    });
+    showToast(`✅ 已將 ${data.length} 筆工單上傳至 Sheets`);
+  } catch (err) {
+    showToast('⚠ 上傳失敗', 'warn');
+  }
 }
 
 // ═══ AUTH (管理員權限) ═══
@@ -1290,7 +1416,7 @@ function showToast(msg, type = 'success') {
 }
 
 // ═══ INIT ═══
-function init() {
+async function init() {
   // Set default dates
   const today = new Date();
   document.getElementById('inp-startDate').value = today.toISOString().slice(0, 10);
@@ -1302,6 +1428,11 @@ function init() {
   initDailyRate();
   renderPersonnelGrid();
   renderCertTable();
+
+  // 啟動時自動從 Google Sheets 同步
+  if (getGasUrl()) {
+    await loadFromSheet();
+  }
 }
 
 init();
