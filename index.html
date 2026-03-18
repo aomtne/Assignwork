@@ -183,6 +183,52 @@
     box-shadow: 0 0 0 2px var(--accent-glow);
   }
 
+  /* ─── COST INPUTS ─── */
+  .cost-input {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 8px; color: var(--text);
+    font-size: 12px; font-family: inherit; width: 100px;
+    text-align: right; transition: border-color 0.2s;
+  }
+  .cost-input:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+  .cost-input::placeholder { color: var(--text-muted); }
+
+  .cost-item {
+    display: flex; align-items: center; gap: 4px; margin: 3px 0;
+    font-size: 12px;
+  }
+  .cost-item .cost-input { width: 85px; }
+  .cost-remove {
+    background: none; border: none; color: var(--danger);
+    cursor: pointer; font-size: 14px; padding: 0 4px;
+    opacity: 0.6; transition: opacity 0.2s;
+  }
+  .cost-remove:hover { opacity: 1; }
+  .cost-add-btn {
+    background: none; border: 1px dashed var(--border-light);
+    border-radius: 4px; color: var(--text-dim); cursor: pointer;
+    font-size: 11px; padding: 2px 8px; margin-top: 3px;
+    transition: all 0.2s;
+  }
+  .cost-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .cost-value { font-weight: 700; font-size: 13px; }
+  .cost-70 { color: var(--accent); }
+  .cost-80 { color: var(--warn); }
+  .cost-90 { color: var(--danger); }
+
+  .daily-rate-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; margin-bottom: 16px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px;
+  }
+  .daily-rate-bar label { font-weight: 600; white-space: nowrap; }
+  .daily-rate-bar .cost-input { width: 110px; font-size: 14px; font-weight: 700; }
+
   /* ─── LEVEL BADGES ─── */
   .badge {
     display: inline-flex; align-items: center; justify-content: center;
@@ -477,11 +523,20 @@
 <div class="main hidden" id="page-worklog">
   <div class="page-header">
     <h1>工號管理</h1>
-    <p>追蹤每一個檢測工號的進度、人員及完工狀態</p>
+    <p>追蹤每一個檢測工號的進度、成本及完工狀態</p>
+  </div>
+
+  <div class="daily-rate-bar">
+    <label>💰 每人日建議價格：</label>
+    <span style="color:var(--text-dim)">NT$</span>
+    <input type="text" class="cost-input" id="daily-rate" value="15,000"
+           oninput="saveDailyRate(this.value); renderWorklog();"
+           style="width:110px; font-size:14px; font-weight:700;">
+    <span style="color:var(--text-dim); font-size:12px;">元／人日</span>
   </div>
 
   <div class="card">
-    <div class="table-wrap">
+    <div class="table-wrap" style="max-height:75vh; overflow:auto;">
       <table>
         <thead>
           <tr>
@@ -492,9 +547,14 @@
             <th>開始日期</th>
             <th>結束日期</th>
             <th>人日數</th>
-            <th>過程管制表</th>
+            <th>報價</th>
+            <th>人力成本</th>
+            <th>物料成本</th>
+            <th>截至當日成本</th>
+            <th>建議報價</th>
+            <th>管制表</th>
             <th>報告</th>
-            <th>完工狀態</th>
+            <th>完工</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -920,6 +980,76 @@ function clearForm() {
 }
 
 // ═══ RENDER WORKLOG ═══
+// ═══ DAILY RATE ═══
+function getDailyRate() {
+  const stored = localStorage.getItem('ndt_daily_rate');
+  return stored ? parseInt(stored) : 15000;
+}
+function saveDailyRate(val) {
+  const num = parseInt(String(val).replace(/[,，\s]/g, '')) || 15000;
+  localStorage.setItem('ndt_daily_rate', num);
+  document.getElementById('daily-rate').value = num.toLocaleString();
+}
+function initDailyRate() {
+  const rate = getDailyRate();
+  document.getElementById('daily-rate').value = rate.toLocaleString();
+}
+
+// ═══ COST HELPERS ═══
+function parseMoney(val) {
+  return parseInt(String(val).replace(/[,，\s$NT]/g, '')) || 0;
+}
+function fmtMoney(n) {
+  return n.toLocaleString();
+}
+
+function addLaborCost(idx) {
+  const orders = loadWorkOrders();
+  if (!orders[idx].laborCosts) orders[idx].laborCosts = [];
+  orders[idx].laborCosts.push(0);
+  saveWorkOrders(orders);
+  renderWorklog();
+}
+function removeLaborCost(idx, ci) {
+  const orders = loadWorkOrders();
+  orders[idx].laborCosts.splice(ci, 1);
+  saveWorkOrders(orders);
+  renderWorklog();
+}
+function updateLaborCost(idx, ci, val) {
+  const orders = loadWorkOrders();
+  if (!orders[idx].laborCosts) orders[idx].laborCosts = [];
+  orders[idx].laborCosts[ci] = parseMoney(val);
+  saveWorkOrders(orders);
+}
+
+function addMaterialCost(idx) {
+  const orders = loadWorkOrders();
+  if (!orders[idx].materialCosts) orders[idx].materialCosts = [];
+  orders[idx].materialCosts.push(0);
+  saveWorkOrders(orders);
+  renderWorklog();
+}
+function removeMaterialCost(idx, ci) {
+  const orders = loadWorkOrders();
+  orders[idx].materialCosts.splice(ci, 1);
+  saveWorkOrders(orders);
+  renderWorklog();
+}
+function updateMaterialCost(idx, ci, val) {
+  const orders = loadWorkOrders();
+  if (!orders[idx].materialCosts) orders[idx].materialCosts = [];
+  orders[idx].materialCosts[ci] = parseMoney(val);
+  saveWorkOrders(orders);
+}
+
+function updateQuote(idx, val) {
+  const orders = loadWorkOrders();
+  orders[idx].quote = parseMoney(val);
+  saveWorkOrders(orders);
+}
+
+// ═══ RENDER WORKLOG ═══
 function renderWorklog() {
   const orders = loadWorkOrders();
   const tbody = document.getElementById('worklog-body');
@@ -934,16 +1064,19 @@ function renderWorklog() {
 
   const now = new Date();
   now.setHours(0,0,0,0);
+  const dailyRate = getDailyRate();
 
   tbody.innerHTML = orders.map((o, i) => {
+    const startDate = new Date(o.startDate);
     const endDate = new Date(o.endDate);
+    startDate.setHours(0,0,0,0);
     endDate.setHours(0,0,0,0);
     const diffDays = Math.floor((now - endDate) / 86400000);
+    const personnelCount = o.personnel ? o.personnel.length : 1;
 
-    // 判斷警示等級：未完工且超過結束日期
+    // 逾期警示
     let rowClass = '';
     let overdueTag = '';
-
     if (!o.completed) {
       if (diffDays > 14) {
         rowClass = 'warn-red';
@@ -954,12 +1087,50 @@ function renderWorklog() {
       }
     }
 
+    // 截至當日成本計算
+    // 未完工：用今天 vs 開始日期算實際人日
+    // 已完工：用結束日期 vs 開始日期算
+    const calcEndDate = o.completed ? endDate : now;
+    const actualDays = Math.max(0, Math.floor((calcEndDate - startDate) / 86400000) + 1);
+    const laborBase = actualDays * personnelCount * dailyRate;
+    const laborExtra = (o.laborCosts || []).reduce((s, v) => s + v, 0);
+    const materialTotal = (o.materialCosts || []).reduce((s, v) => s + v, 0);
+    const currentCost = laborBase + laborExtra + materialTotal;
+
+    // 成本佔報價比例 → 顏色
+    const quote = o.quote || 0;
+    let costClass = '';
+    if (quote > 0) {
+      const ratio = currentCost / quote;
+      if (ratio >= 0.9) costClass = 'cost-90';
+      else if (ratio >= 0.8) costClass = 'cost-80';
+      else if (ratio >= 0.7) costClass = 'cost-70';
+    }
+
+    // 人力成本明細 HTML
+    const laborItems = (o.laborCosts || []).map((v, ci) => `
+      <div class="cost-item">
+        <input class="cost-input" value="${v ? fmtMoney(v) : ''}" placeholder="金額"
+               onblur="updateLaborCost(${i},${ci},this.value); renderWorklog();">
+        <button class="cost-remove" onclick="removeLaborCost(${i},${ci})">✕</button>
+      </div>
+    `).join('');
+
+    // 物料成本明細 HTML
+    const materialItems = (o.materialCosts || []).map((v, ci) => `
+      <div class="cost-item">
+        <input class="cost-input" value="${v ? fmtMoney(v) : ''}" placeholder="金額"
+               onblur="updateMaterialCost(${i},${ci},this.value); renderWorklog();">
+        <button class="cost-remove" onclick="removeMaterialCost(${i},${ci})">✕</button>
+      </div>
+    `).join('');
+
     return `
     <tr class="${rowClass}">
       <td style="font-weight:700; color:var(--accent)">${o.workId}${overdueTag}</td>
       <td>${o.projectName}</td>
       <td><span class="badge badge-2">${o.method}</span></td>
-      <td>${o.personnel.join('、')}</td>
+      <td style="font-size:12px;">${o.personnel.join('、')}</td>
       <td>${isAdmin
         ? `<input type="date" class="date-input-inline" value="${o.startDate}"
                onchange="updateOrderDate(${i},'startDate',this.value)">`
@@ -969,6 +1140,28 @@ function renderWorklog() {
                onchange="updateOrderDate(${i},'endDate',this.value)">`
         : o.endDate}</td>
       <td style="text-align:center; font-weight:700">${o.manDays}</td>
+      <td>
+        <input class="cost-input" value="${quote ? fmtMoney(quote) : ''}" placeholder="輸入報價"
+               onblur="updateQuote(${i},this.value); renderWorklog();">
+      </td>
+      <td style="min-width:120px;">
+        <div style="font-size:11px; color:var(--text-dim); margin-bottom:2px;">
+          基本：${fmtMoney(laborBase)}
+        </div>
+        ${laborItems}
+        <button class="cost-add-btn" onclick="addLaborCost(${i})">＋ 新增人力</button>
+      </td>
+      <td style="min-width:120px;">
+        ${materialItems}
+        <button class="cost-add-btn" onclick="addMaterialCost(${i})">＋ 新增物料</button>
+      </td>
+      <td style="text-align:right;">
+        <span class="cost-value ${costClass}">${fmtMoney(currentCost)}</span>
+        ${quote > 0 ? `<div style="font-size:10px; color:var(--text-muted);">${Math.round(currentCost/quote*100)}% of 報價</div>` : ''}
+      </td>
+      <td style="text-align:right;">
+        <span class="cost-value" style="color:var(--accent2);">${fmtMoney(Math.ceil(currentCost / 0.85))}</span>
+      </td>
       <td class="check-cell">
         <input type="checkbox" ${o.processControl ? 'checked' : ''} 
                onchange="updateOrderField(${i},'processControl',this.checked)">
@@ -979,7 +1172,7 @@ function renderWorklog() {
       </td>
       <td class="check-cell">
         <input type="checkbox" ${o.completed ? 'checked' : ''} 
-               onchange="updateOrderField(${i},'completed',this.checked)">
+               onchange="updateOrderField(${i},'completed',this.checked); renderWorklog();">
       </td>
       <td>${isAdmin
         ? `<button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>`
@@ -1106,6 +1299,7 @@ function init() {
 
   checkAdminSession();
   updateAdminUI();
+  initDailyRate();
   renderPersonnelGrid();
   renderCertTable();
 }
