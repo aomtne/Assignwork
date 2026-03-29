@@ -591,6 +591,43 @@
       <p>尚無工號資料，請先於「派工作業」頁面建立工單</p>
     </div>
   </div>
+
+  <!-- ═══ 完工區 ═══ -->
+  <div class="card hidden" id="completed-section" style="margin-top:16px; opacity:0.85;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; cursor:pointer;"
+         onclick="toggleCompletedSection()">
+      <h3 style="margin:0; font-size:15px; color:var(--accent2);">
+        ✅ 已完工工號 <span id="completed-count" style="font-size:13px; color:var(--text-dim);"></span>
+      </h3>
+      <span id="completed-toggle-icon" style="font-size:13px; color:var(--text-muted);">展開 ▼</span>
+    </div>
+    <div id="completed-content" style="display:none;">
+      <div class="table-wrap" style="max-height:50vh; overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>工號</th>
+              <th>檢測項目</th>
+              <th>檢測方法</th>
+              <th>檢測人員</th>
+              <th>開始日期</th>
+              <th>結束日期</th>
+              <th>人日數</th>
+              <th>報價</th>
+              <th>截至當日成本</th>
+              <th>建議報價</th>
+              <th>管制表</th>
+              <th>報告</th>
+              <th>完工</th>
+              <th>維護人</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="completed-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ PAGE: 支援統計 ═══ -->
@@ -1235,24 +1272,21 @@ function updateQuote(idx, val) {
   saveWorkOrders(orders);
 }
 
-// ═══ RENDER WORKLOG ═══
-function renderWorklog() {
-  const orders = loadWorkOrders();
-  const tbody = document.getElementById('worklog-body');
-  const empty = document.getElementById('worklog-empty');
-
-  if (orders.length === 0) {
-    tbody.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
+// ═══ 完工區展開/收合 ═══
+function toggleCompletedSection() {
+  const content = document.getElementById('completed-content');
+  const icon = document.getElementById('completed-toggle-icon');
+  if (content.style.display === 'none') {
+    content.style.display = '';
+    icon.textContent = '收合 ▲';
+  } else {
+    content.style.display = 'none';
+    icon.textContent = '展開 ▼';
   }
-  empty.classList.add('hidden');
+}
 
-  const now = new Date();
-  now.setHours(0,0,0,0);
-  const dailyRate = getDailyRate();
-
-  tbody.innerHTML = orders.map((o, i) => {
+// ═══ 產生工單列 HTML（共用） ═══
+function buildOrderRow(o, i, dailyRate, now, isCompletedRow) {
     const startDate = new Date(o.startDate);
     const endDate = new Date(o.endDate);
     startDate.setHours(0,0,0,0);
@@ -1260,7 +1294,7 @@ function renderWorklog() {
     const diffDays = Math.floor((now - endDate) / 86400000);
     const personnelCount = o.personnel ? o.personnel.length : 1;
 
-    // 逾期警示
+    // 逾期警示（僅未完工）
     let rowClass = '';
     let overdueTag = '';
     if (!o.completed) {
@@ -1273,9 +1307,6 @@ function renderWorklog() {
       }
     }
 
-    // 截至當日成本計算
-    // 未完工：用今天 vs 開始日期算實際人日
-    // 已完工：用結束日期 vs 開始日期算
     const calcEndDate = o.completed ? endDate : now;
     const actualDays = Math.max(0, Math.floor((calcEndDate - startDate) / 86400000) + 1);
     const laborBase = actualDays * personnelCount * dailyRate;
@@ -1283,7 +1314,6 @@ function renderWorklog() {
     const materialTotal = (o.materialCosts || []).reduce((s, v) => s + v, 0);
     const currentCost = laborBase + laborExtra + materialTotal;
 
-    // 成本佔報價比例 → 顏色
     const quote = o.quote || 0;
     let costClass = '';
     if (quote > 0) {
@@ -1293,7 +1323,34 @@ function renderWorklog() {
       else if (ratio >= 0.7) costClass = 'cost-70';
     }
 
-    // 人力成本明細 HTML
+    // 完工區：精簡顯示（無人力/物料明細編輯）
+    if (isCompletedRow) {
+      return `
+      <tr style="opacity:0.75;">
+        <td style="font-weight:700; color:var(--accent)">${o.workId}</td>
+        <td>${o.projectName}</td>
+        <td><span class="badge badge-2">${o.method}</span></td>
+        <td style="font-size:12px;">${Array.isArray(o.personnel) ? o.personnel.join('、') : (o.personnel || '')}</td>
+        <td>${o.startDate}</td>
+        <td>${o.endDate}</td>
+        <td style="text-align:center; font-weight:700">${o.manDays}</td>
+        <td style="text-align:right;">${quote ? fmtMoney(quote) : ''}</td>
+        <td style="text-align:right;"><span class="cost-value">${fmtMoney(currentCost)}</span></td>
+        <td style="text-align:right;"><span class="cost-value" style="color:var(--accent2);">${fmtMoney(Math.ceil(currentCost / 0.85))}</span></td>
+        <td class="check-cell"><input type="checkbox" ${o.processControl ? 'checked' : ''} disabled></td>
+        <td class="check-cell"><input type="checkbox" ${o.report ? 'checked' : ''} disabled></td>
+        <td class="check-cell">
+          <input type="checkbox" checked
+                 onchange="updateOrderField(${i},'completed',this.checked); renderWorklog();">
+        </td>
+        <td style="font-size:12px; color:var(--text-dim);">${o.maintainer || ''}</td>
+        <td>${isAdmin
+          ? `<button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>`
+          : `<span style="color:var(--text-muted); font-size:12px;">—</span>`}</td>
+      </tr>`;
+    }
+
+    // 進行中：完整編輯功能
     const laborItems = (o.laborCosts || []).map((v, ci) => `
       <div class="cost-item">
         <input class="cost-input" value="${v ? fmtMoney(v) : ''}" placeholder="金額"
@@ -1302,7 +1359,6 @@ function renderWorklog() {
       </div>
     `).join('');
 
-    // 物料成本明細 HTML
     const materialItems = (o.materialCosts || []).map((v, ci) => `
       <div class="cost-item">
         <input class="cost-input" value="${v ? fmtMoney(v) : ''}" placeholder="金額"
@@ -1316,7 +1372,7 @@ function renderWorklog() {
       <td style="font-weight:700; color:var(--accent)">${o.workId}${overdueTag}</td>
       <td>${o.projectName}</td>
       <td><span class="badge badge-2">${o.method}</span></td>
-      <td style="font-size:12px;">${o.personnel.join('、')}</td>
+      <td style="font-size:12px;">${Array.isArray(o.personnel) ? o.personnel.join('、') : (o.personnel || '')}</td>
       <td>${isAdmin
         ? `<input type="date" class="date-input-inline" value="${o.startDate}"
                onchange="updateOrderDate(${i},'startDate',this.value)">`
@@ -1349,15 +1405,15 @@ function renderWorklog() {
         <span class="cost-value" style="color:var(--accent2);">${fmtMoney(Math.ceil(currentCost / 0.85))}</span>
       </td>
       <td class="check-cell">
-        <input type="checkbox" ${o.processControl ? 'checked' : ''} 
+        <input type="checkbox" ${o.processControl ? 'checked' : ''}
                onchange="updateOrderField(${i},'processControl',this.checked)">
       </td>
       <td class="check-cell">
-        <input type="checkbox" ${o.report ? 'checked' : ''} 
+        <input type="checkbox" ${o.report ? 'checked' : ''}
                onchange="updateOrderField(${i},'report',this.checked)">
       </td>
       <td class="check-cell">
-        <input type="checkbox" ${o.completed ? 'checked' : ''} 
+        <input type="checkbox" ${o.completed ? 'checked' : ''}
                onchange="updateOrderField(${i},'completed',this.checked); renderWorklog();">
       </td>
       <td style="font-size:12px; color:var(--text-dim);">${o.maintainer || ''}</td>
@@ -1365,7 +1421,60 @@ function renderWorklog() {
         ? `<button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>`
         : `<span style="color:var(--text-muted); font-size:12px;">—</span>`}</td>
     </tr>`;
-  }).join('');
+}
+
+// ═══ RENDER WORKLOG ═══
+function renderWorklog() {
+  const orders = loadWorkOrders();
+  const tbody = document.getElementById('worklog-body');
+  const empty = document.getElementById('worklog-empty');
+  const completedSection = document.getElementById('completed-section');
+  const completedBody = document.getElementById('completed-body');
+  const completedCount = document.getElementById('completed-count');
+
+  // 分離進行中 vs 已完工
+  const activeOrders = [];
+  const completedOrders = [];
+  orders.forEach((o, i) => {
+    if (o.completed) {
+      completedOrders.push({ order: o, index: i });
+    } else {
+      activeOrders.push({ order: o, index: i });
+    }
+  });
+
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const dailyRate = getDailyRate();
+
+  // 渲染進行中工單
+  if (activeOrders.length === 0 && completedOrders.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    completedSection.classList.add('hidden');
+    return;
+  }
+
+  if (activeOrders.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+  } else {
+    empty.classList.add('hidden');
+    tbody.innerHTML = activeOrders.map(item =>
+      buildOrderRow(item.order, item.index, dailyRate, now, false)
+    ).join('');
+  }
+
+  // 渲染已完工區
+  if (completedOrders.length > 0) {
+    completedSection.classList.remove('hidden');
+    completedCount.textContent = `(${completedOrders.length} 筆)`;
+    completedBody.innerHTML = completedOrders.map(item =>
+      buildOrderRow(item.order, item.index, dailyRate, now, true)
+    ).join('');
+  } else {
+    completedSection.classList.add('hidden');
+  }
 }
 
 function updateOrderDate(index, field, value) {
