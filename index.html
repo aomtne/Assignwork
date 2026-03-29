@@ -673,12 +673,12 @@ function getDispatchSyncUrl() { return 'https://script.google.com/macros/s/' + _
 
 function syncDispatchToSheet(order) {
   try {
-    fetch(getDispatchSyncUrl(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'addDispatch', data: order })
-    }).then(() => console.log('✅ 派工已同步至 Google Sheets'))
-      .catch(err => console.warn('派工同步失敗:', err));
+    var url = getDispatchSyncUrl()
+      + '?action=addDispatch&data=' + encodeURIComponent(JSON.stringify(order));
+    fetch(url, { redirect: 'follow' })
+      .then(function(r) { return r.text(); })
+      .then(function(t) { console.log('✅ 派工已同步至 Google Sheets:', t); })
+      .catch(function(err) { console.warn('派工同步失敗:', err); });
   } catch(e) { console.warn('syncDispatchToSheet error:', e); }
 }
 
@@ -743,6 +743,29 @@ function syncToSheet(data) {
   }, 1500);
 }
 
+// ─── 中文 key → 英文 key 對照（安全 fallback） ───
+function normalizeOrder(r) {
+  if (r.workId !== undefined) return r;  // 已經是英文 key
+  var personnel = (r['檢測人員'] || '').toString();
+  var personnelArr = personnel ? personnel.split('、') : [];
+  return {
+    workId: r['工號'] || '',
+    projectName: r['檢測項目'] || '',
+    method: r['檢測方法'] || '',
+    personnel: personnelArr,
+    startDate: r['開始日期'] || '',
+    endDate: r['結束日期'] || '',
+    manDays: Number(r['人日數']) || 0,
+    quote: Number(r['報價']) || 0,
+    processControl: r['管制表'] === '是',
+    report: r['報告'] === '是',
+    completed: r['完工'] === '是',
+    maintainer: r['維護人'] || '',
+    laborCosts: r.laborCosts || [],
+    materialCosts: r.materialCosts || []
+  };
+}
+
 // ─── 從 Google Sheets 載入 ───
 async function loadFromSheet() {
   if (!getGasUrl()) return null;
@@ -751,9 +774,11 @@ async function loadFromSheet() {
     const res = await fetch(getGasUrl() + '?action=load');
     const json = await res.json();
     if (json.status === 'ok' && Array.isArray(json.data)) {
-      localStorage.setItem('ndt_workorders', JSON.stringify(json.data));
-      showToast(`✅ 已從 Sheets 載入 ${json.data.length} 筆工單`);
-      return json.data;
+      // 確保資料使用英文 key（相容舊版 Apps Script）
+      const normalized = json.data.map(normalizeOrder);
+      localStorage.setItem('ndt_workorders', JSON.stringify(normalized));
+      showToast(`✅ 已從 Sheets 載入 ${normalized.length} 筆工單`);
+      return normalized;
     }
   } catch (err) {
     console.warn('Load from Sheets failed:', err);
