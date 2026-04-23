@@ -6,413 +6,132 @@
 <title>NDT 派工管理系統</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&display=swap');
-
   :root {
-    --bg: #0a0e17;
-    --surface: #111827;
-    --surface2: #1a2235;
-    --surface3: #243049;
-    --border: #2d3a52;
-    --border-light: #3b4d6e;
-    --text: #e8edf5;
-    --text-dim: #8896b0;
-    --text-muted: #5a6a85;
-    --accent: #3b82f6;
-    --accent-glow: rgba(59, 130, 246, 0.3);
-    --accent2: #06b6d4;
-    --success: #10b981;
-    --warn: #f59e0b;
-    --danger: #ef4444;
-    --level3: #a855f7;
-    --level2: #3b82f6;
-    --level1: #f59e0b;
-    --level0: #64748b;
-    --radius: 10px;
+    --bg:#0a0e17;--surface:#111827;--surface2:#1a2235;--surface3:#243049;
+    --border:#2d3a52;--border-light:#3b4d6e;--text:#e8edf5;
+    --text-dim:#8896b0;--text-muted:#5a6a85;
+    --accent:#3b82f6;--accent-glow:rgba(59,130,246,0.3);--accent2:#06b6d4;
+    --success:#10b981;--warn:#f59e0b;--danger:#ef4444;
+    --level3:#a855f7;--level2:#3b82f6;--level1:#f59e0b;--level0:#64748b;
+    --radius:10px;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'Noto Sans TC', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ─── NAV ─── */
-  .nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(10, 14, 23, 0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex; align-items: center; height: 60px;
-  }
-  .nav-brand {
-    font-weight: 900; font-size: 18px; letter-spacing: 1px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-right: 40px; white-space: nowrap;
-  }
-  .nav-tabs { display: flex; gap: 4px; }
-  .nav-tab {
-    padding: 8px 20px; border-radius: 8px; cursor: pointer;
-    font-size: 14px; font-weight: 500; color: var(--text-dim);
-    transition: all 0.2s; border: none; background: none;
-  }
-  .nav-tab:hover { color: var(--text); background: var(--surface2); }
-  .nav-tab.active {
-    color: var(--accent); background: rgba(59,130,246,0.12);
-    box-shadow: inset 0 -2px 0 var(--accent);
-  }
-
-  .main { padding: 80px 24px 40px; max-width: 1400px; margin: 0 auto; }
-
-  /* ─── PAGE HEADER ─── */
-  .page-header {
-    margin-bottom: 28px;
-  }
-  .page-header h1 {
-    font-size: 26px; font-weight: 700; margin-bottom: 6px;
-  }
-  .page-header p { color: var(--text-dim); font-size: 14px; }
-
-  /* ─── CARDS ─── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .card-title {
-    font-size: 15px; font-weight: 600; margin-bottom: 16px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .card-title .icon { font-size: 18px; }
-
-  /* ─── FORM ─── */
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group label {
-    font-size: 12px; font-weight: 600; color: var(--text-dim);
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .form-group input, .form-group select {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 14px; color: var(--text);
-    font-size: 14px; font-family: inherit;
-    transition: border-color 0.2s;
-  }
-  .form-group input:focus, .form-group select:focus {
-    outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  /* ─── BUTTONS ─── */
-  .btn {
-    padding: 10px 22px; border-radius: 8px; border: none;
-    font-family: inherit; font-size: 14px; font-weight: 600;
-    cursor: pointer; transition: all 0.2s; display: inline-flex;
-    align-items: center; gap: 6px;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #2563eb);
-    color: #fff;
-    box-shadow: 0 2px 12px var(--accent-glow);
-  }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
-  .btn-secondary {
-    background: var(--surface2); color: var(--text-dim);
-    border: 1px solid var(--border);
-  }
-  .btn-secondary:hover { border-color: var(--border-light); color: var(--text); }
-  .btn-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
-  .btn-danger:hover { background: rgba(239,68,68,0.25); }
-  .btn-sm { padding: 6px 14px; font-size: 12px; }
-
-  /* ─── TABLES ─── */
-  .table-wrap {
-    overflow-x: auto;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
-  table {
-    width: 100%; border-collapse: collapse;
-    font-size: 13px;
-  }
-  th {
-    background: var(--surface2); padding: 10px 14px;
-    text-align: left; font-weight: 600; font-size: 12px;
-    color: var(--text-dim); text-transform: uppercase;
-    letter-spacing: 0.5px; white-space: nowrap;
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 2;
-  }
-  td {
-    padding: 10px 14px; border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  tr:hover td { background: rgba(59,130,246,0.04); }
-  tr:last-child td { border-bottom: none; }
-  tr.warn-yellow td { background: rgba(245,158,11,0.12); }
-  tr.warn-yellow:hover td { background: rgba(245,158,11,0.18); }
-  tr.warn-red td { background: rgba(239,68,68,0.14); }
-  tr.warn-red:hover td { background: rgba(239,68,68,0.22); }
-  .overdue-tag {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 11px; font-weight: 700; margin-left: 6px;
-  }
-  .overdue-tag.yellow { background: rgba(245,158,11,0.2); color: var(--warn); }
-  .overdue-tag.red { background: rgba(239,68,68,0.2); color: var(--danger); }
-
-  /* ─── INLINE EDITABLE DATE ─── */
-  .date-input-inline {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; padding: 4px 8px; color: var(--text);
-    font-size: 13px; font-family: inherit; width: 130px;
-    cursor: pointer; transition: border-color 0.2s;
-  }
-  .date-input-inline:focus {
-    outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-glow);
-  }
-
-  /* ─── COST INPUTS ─── */
-  .cost-input {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; padding: 4px 8px; color: var(--text);
-    font-size: 12px; font-family: inherit; width: 100px;
-    text-align: right; transition: border-color 0.2s;
-  }
-  .cost-input:focus {
-    outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-glow);
-  }
-  .cost-input::placeholder { color: var(--text-muted); }
-
-  .cost-item {
-    display: flex; align-items: center; gap: 4px; margin: 3px 0;
-    font-size: 12px;
-  }
-  .cost-item .cost-input { width: 85px; }
-  .cost-remove {
-    background: none; border: none; color: var(--danger);
-    cursor: pointer; font-size: 14px; padding: 0 4px;
-    opacity: 0.6; transition: opacity 0.2s;
-  }
-  .cost-remove:hover { opacity: 1; }
-  .cost-add-btn {
-    background: none; border: 1px dashed var(--border-light);
-    border-radius: 4px; color: var(--text-dim); cursor: pointer;
-    font-size: 11px; padding: 2px 8px; margin-top: 3px;
-    transition: all 0.2s;
-  }
-  .cost-add-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  .cost-value { font-weight: 700; font-size: 13px; }
-  .cost-70 { color: var(--accent); }
-  .cost-80 { color: var(--warn); }
-  .cost-90 { color: var(--danger); }
-
-  .daily-rate-bar {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; margin-bottom: 16px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius); font-size: 13px;
-  }
-  .daily-rate-bar label { font-weight: 600; white-space: nowrap; }
-  .daily-rate-bar .cost-input { width: 110px; font-size: 14px; font-weight: 700; }
-
-  /* ─── LEVEL BADGES ─── */
-  .badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 2px 10px; border-radius: 6px; font-size: 12px;
-    font-weight: 700; min-width: 32px;
-  }
-  .badge-3 { background: rgba(168,85,247,0.15); color: var(--level3); }
-  .badge-2 { background: rgba(59,130,246,0.15); color: var(--level2); }
-  .badge-1 { background: rgba(245,158,11,0.15); color: var(--level1); }
-  .badge-0 { background: rgba(100,116,139,0.1); color: var(--level0); }
-
-  /* ─── CHECKBOX GRID ─── */
-  .personnel-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px; margin-top: 12px;
-  }
-  .personnel-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-radius: 8px;
-    background: var(--surface2); border: 1px solid var(--border);
-    cursor: pointer; transition: all 0.2s;
-    user-select: none;
-  }
-  .personnel-item:hover { border-color: var(--border-light); }
-  .personnel-item.selected {
-    border-color: var(--accent);
-    background: rgba(59,130,246,0.08);
-    box-shadow: 0 0 0 1px var(--accent);
-  }
-  .personnel-item.disabled {
-    opacity: 0.35; pointer-events: none;
-  }
-  .personnel-item input[type="checkbox"] {
-    accent-color: var(--accent); width: 16px; height: 16px;
-  }
-  .personnel-item .name { font-weight: 600; font-size: 14px; }
-  .personnel-item .level { font-size: 11px; margin-left: auto; }
-
-  /* ─── SUGGESTION BOX ─── */
-  .suggestion-box {
-    background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(6,182,212,0.06));
-    border: 1px solid rgba(59,130,246,0.2);
-    border-radius: var(--radius); padding: 20px; margin-top: 16px;
-  }
-  .suggestion-box h3 {
-    font-size: 14px; font-weight: 600; color: var(--accent);
-    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
-  }
-  .suggestion-tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: 20px; margin: 4px;
-    font-size: 13px; font-weight: 500;
-    background: var(--surface); border: 1px solid var(--border);
-  }
-
-  /* ─── CHECKBOX for completion ─── */
-  .check-cell {
-    text-align: center;
-  }
-  .check-cell input[type="checkbox"] {
-    accent-color: var(--success); width: 18px; height: 18px;
-    cursor: pointer;
-  }
-
-  /* ─── STAT CARDS ─── */
-  .stats-row {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px; margin-bottom: 24px;
-  }
-  .stat-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-    text-align: center;
-  }
-  .stat-card .value {
-    font-size: 28px; font-weight: 900;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .stat-card .label { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-
-  /* ─── MODAL ─── */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px); z-index: 200;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 28px; max-width: 500px; width: 90%;
-    max-height: 80vh; overflow-y: auto;
-  }
-  .modal h2 { font-size: 18px; margin-bottom: 16px; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-  .hidden { display: none !important; }
-
-  /* ─── YEAR SELECTOR ─── */
-  .year-selector {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-  }
-  .year-selector select {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 14px; color: var(--text);
-    font-size: 14px; font-family: inherit;
-  }
-
-  /* ─── EMPTY STATE ─── */
-  .empty-state {
-    text-align: center; padding: 60px 20px; color: var(--text-muted);
-  }
-  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
-
-  /* ─── TOAST ─── */
-  .toast {
-    position: fixed; bottom: 24px; right: 24px; z-index: 300;
-    background: var(--success); color: #fff; padding: 12px 24px;
-    border-radius: 10px; font-weight: 600; font-size: 14px;
-    box-shadow: 0 8px 30px rgba(16,185,129,0.3);
-    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
-  }
-  @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } }
-  @keyframes toastOut { to { transform: translateY(20px); opacity: 0; } }
-
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 768px) {
-    .nav-brand { font-size: 15px; margin-right: 16px; }
-    .nav-tab { padding: 6px 12px; font-size: 12px; }
-    .main { padding: 72px 12px 24px; }
-    .form-grid { grid-template-columns: 1fr; }
-    .personnel-grid { grid-template-columns: 1fr 1fr; }
-  }
-
-  /* ─── PDF UPLOAD ZONE ─── */
-  .upload-zone {
-    border: 2px dashed var(--border-light);
-    border-radius: var(--radius);
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-bottom: 16px;
-  }
-  .upload-zone:hover {
-    border-color: var(--accent);
-    background: rgba(59,130,246,0.04);
-  }
-  .upload-zone .icon { font-size: 36px; margin-bottom: 8px; }
-  .upload-zone p { color: var(--text-dim); font-size: 13px; }
-
-  .filter-bar {
-    display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;
-  }
-  .search-input {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 14px; color: var(--text);
-    font-size: 14px; font-family: inherit; width: 200px;
-  }
-  .search-input:focus { outline: none; border-color: var(--accent); }
-
-  /* ─── METHOD CHIPS ─── */
-  .method-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 6px 12px; border-radius: 8px; cursor: pointer;
-    background: var(--surface2); border: 1px solid var(--border);
-    font-size: 13px; font-weight: 500; color: var(--text-dim);
-    transition: all 0.2s; user-select: none;
-  }
-  .method-chip:hover { border-color: var(--border-light); color: var(--text); }
-  .method-chip:has(input:checked) {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(59,130,246,0.1);
-    box-shadow: 0 0 0 1px var(--accent);
-  }
-  .method-chip input[type="checkbox"] {
-    accent-color: var(--accent); width: 14px; height: 14px;
-  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;height:60px;}
+  .nav-brand{font-weight:900;font-size:18px;letter-spacing:1px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-right:40px;white-space:nowrap;}
+  .nav-tabs{display:flex;gap:4px;}
+  .nav-tab{padding:8px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text-dim);transition:all 0.2s;border:none;background:none;}
+  .nav-tab:hover{color:var(--text);background:var(--surface2);}
+  .nav-tab.active{color:var(--accent);background:rgba(59,130,246,0.12);box-shadow:inset 0 -2px 0 var(--accent);}
+  .main{padding:80px 24px 40px;max-width:1400px;margin:0 auto;}
+  .page-header{margin-bottom:28px;}
+  .page-header h1{font-size:26px;font-weight:700;margin-bottom:6px;}
+  .page-header p{color:var(--text-dim);font-size:14px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+  .card-title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .card-title .icon{font-size:18px;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group label{font-size:12px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;}
+  .form-group input,.form-group select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;transition:border-color 0.2s;}
+  .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+  .btn{padding:10px 22px;border-radius:8px;border:none;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;box-shadow:0 2px 12px var(--accent-glow);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--accent-glow);}
+  .btn-secondary{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--border-light);color:var(--text);}
+  .btn-danger{background:rgba(239,68,68,0.15);color:var(--danger);}
+  .btn-danger:hover{background:rgba(239,68,68,0.25);}
+  .btn-sm{padding:6px 14px;font-size:12px;}
+  .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:600;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  tr:hover td{background:rgba(59,130,246,0.04);}
+  tr:last-child td{border-bottom:none;}
+  tr.warn-yellow td{background:rgba(245,158,11,0.12);}
+  tr.warn-yellow:hover td{background:rgba(245,158,11,0.18);}
+  tr.warn-red td{background:rgba(239,68,68,0.14);}
+  tr.warn-red:hover td{background:rgba(239,68,68,0.22);}
+  .overdue-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-left:6px;}
+  .overdue-tag.yellow{background:rgba(245,158,11,0.2);color:var(--warn);}
+  .overdue-tag.red{background:rgba(239,68,68,0.2);color:var(--danger);}
+  .date-input-inline{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:13px;font-family:inherit;width:130px;cursor:pointer;transition:border-color 0.2s;}
+  .date-input-inline:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow);}
+  .cost-input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit;width:100px;text-align:right;transition:border-color 0.2s;}
+  .cost-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow);}
+  .cost-input::placeholder{color:var(--text-muted);}
+  .cost-item{display:flex;align-items:center;gap:4px;margin:3px 0;font-size:12px;flex-wrap:wrap;}
+  .cost-item .cost-input{width:80px;}
+  .cost-remove{background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:0 4px;opacity:0.6;transition:opacity 0.2s;}
+  .cost-remove:hover{opacity:1;}
+  .cost-add-btn{background:none;border:1px dashed var(--border-light);border-radius:4px;color:var(--text-dim);cursor:pointer;font-size:11px;padding:2px 8px;margin-top:3px;transition:all 0.2s;}
+  .cost-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+  /* 備註輸入框 */
+  .cost-remark-input{background:transparent;border:none;border-bottom:1px dashed var(--border-light);border-radius:0;padding:1px 4px;color:var(--text-dim);font-size:11px;font-family:inherit;width:90px;transition:border-color 0.2s;}
+  .cost-remark-input:focus{outline:none;border-bottom-color:var(--accent);color:var(--text);}
+  .cost-remark-input::placeholder{color:var(--text-muted);font-style:italic;}
+  /* 同工號主列 */
+  tr.workid-summary td{background:rgba(6,182,212,0.09)!important;font-weight:700;border-top:2px solid rgba(6,182,212,0.4);border-bottom:1px solid rgba(6,182,212,0.2);}
+  tr.workid-summary:hover td{background:rgba(6,182,212,0.15)!important;}
+  /* 人日數輸入框 */
+  .mandays-input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-size:13px;font-family:inherit;width:60px;text-align:center;font-weight:700;transition:border-color 0.2s;}
+  .mandays-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow);}
+  .mandays-override{border-color:var(--warn)!important;}
+  .cost-value{font-weight:700;font-size:13px;}
+  .cost-70{color:var(--accent);}
+  .cost-80{color:var(--warn);}
+  .cost-90{color:var(--danger);}
+  .daily-rate-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;}
+  .daily-rate-bar label{font-weight:600;white-space:nowrap;}
+  .daily-rate-bar .cost-input{width:110px;font-size:14px;font-weight:700;}
+  .badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 10px;border-radius:6px;font-size:12px;font-weight:700;min-width:32px;}
+  .badge-3{background:rgba(168,85,247,0.15);color:var(--level3);}
+  .badge-2{background:rgba(59,130,246,0.15);color:var(--level2);}
+  .badge-1{background:rgba(245,158,11,0.15);color:var(--level1);}
+  .badge-0{background:rgba(100,116,139,0.1);color:var(--level0);}
+  .personnel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px;}
+  .personnel-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;user-select:none;}
+  .personnel-item:hover{border-color:var(--border-light);}
+  .personnel-item.selected{border-color:var(--accent);background:rgba(59,130,246,0.08);box-shadow:0 0 0 1px var(--accent);}
+  .personnel-item.disabled{opacity:0.35;pointer-events:none;}
+  .personnel-item input[type="checkbox"]{accent-color:var(--accent);width:16px;height:16px;}
+  .personnel-item .name{font-weight:600;font-size:14px;}
+  .personnel-item .level{font-size:11px;margin-left:auto;}
+  .suggestion-box{background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(6,182,212,0.06));border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:20px;margin-top:16px;}
+  .suggestion-box h3{font-size:14px;font-weight:600;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .suggestion-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;margin:4px;font-size:13px;font-weight:500;background:var(--surface);border:1px solid var(--border);}
+  .check-cell{text-align:center;}
+  .check-cell input[type="checkbox"]{accent-color:var(--success);width:18px;height:18px;cursor:pointer;}
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;}
+  .stat-card .value{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .stat-card .label{font-size:12px;color:var(--text-dim);margin-top:4px;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;}
+  .modal h2{font-size:18px;margin-bottom:16px;}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+  .hidden{display:none!important;}
+  .year-selector{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+  .year-selector select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:14px;font-family:inherit;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
+  .empty-state .icon{font-size:48px;margin-bottom:12px;}
+  .empty-state p{font-size:14px;}
+  .toast{position:fixed;bottom:24px;right:24px;z-index:300;background:var(--success);color:#fff;padding:12px 24px;border-radius:10px;font-weight:600;font-size:14px;box-shadow:0 8px 30px rgba(16,185,129,0.3);animation:toastIn 0.3s ease,toastOut 0.3s ease 2.5s forwards;}
+  @keyframes toastIn{from{transform:translateY(20px);opacity:0;}}
+  @keyframes toastOut{to{transform:translateY(20px);opacity:0;}}
+  @media(max-width:768px){.nav-brand{font-size:15px;margin-right:16px;}.nav-tab{padding:6px 12px;font-size:12px;}.main{padding:72px 12px 24px;}.form-grid{grid-template-columns:1fr;}.personnel-grid{grid-template-columns:1fr 1fr;}}
+  .filter-bar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .search-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:14px;font-family:inherit;width:200px;}
+  .search-input:focus{outline:none;border-color:var(--accent);}
+  .method-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;cursor:pointer;background:var(--surface2);border:1px solid var(--border);font-size:13px;font-weight:500;color:var(--text-dim);transition:all 0.2s;user-select:none;}
+  .method-chip:hover{border-color:var(--border-light);color:var(--text);}
+  .method-chip:has(input:checked){border-color:var(--accent);color:var(--accent);background:rgba(59,130,246,0.1);box-shadow:0 0 0 1px var(--accent);}
+  .method-chip input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;}
 </style>
 </head>
 <body>
 
-<!-- ═══ NAVIGATION ═══ -->
 <nav class="nav">
   <div class="nav-brand">⚙ NDT 派工系統</div>
   <div class="nav-tabs">
@@ -421,27 +140,24 @@
     <button class="nav-tab" onclick="showPage('stats')">📈 支援統計</button>
     <button class="nav-tab" onclick="showPage('personnel')">👤 人員證照</button>
   </div>
-  <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-    <button class="btn btn-secondary btn-sm" onclick="showSyncSettings()" title="Google Sheets 設定">☁ Sheets</button>
-    <span id="admin-badge" class="hidden" style="font-size:11px; background:rgba(16,185,129,0.15); color:var(--success); padding:3px 10px; border-radius:20px; font-weight:600;">🔓 管理員</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+    <button class="btn btn-secondary btn-sm" onclick="showSyncSettings()">☁ Sheets</button>
+    <span id="admin-badge" class="hidden" style="font-size:11px;background:rgba(16,185,129,0.15);color:var(--success);padding:3px 10px;border-radius:20px;font-weight:600;">🔓 管理員</span>
     <button id="admin-login-btn" class="btn btn-secondary btn-sm" onclick="showAuthModal()">🔒 管理登入</button>
     <button id="admin-logout-btn" class="btn btn-secondary btn-sm hidden" onclick="adminLogout()">登出</button>
   </div>
 </nav>
 
-<!-- ═══ SYNC SETTINGS MODAL ═══ -->
+<!-- Sync Modal -->
 <div class="modal-overlay hidden" id="sync-modal" onclick="if(event.target===this)this.classList.add('hidden')">
   <div class="modal">
     <h2>☁ Google Sheets 同步設定</h2>
-    <p style="font-size:13px; color:var(--text-dim); margin-bottom:16px;">
-      將派工資料同步到 Google Sheets，換電腦也不會遺失。
-    </p>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">將派工資料同步到 Google Sheets，換電腦也不會遺失。</p>
     <div class="form-group" style="margin-bottom:16px;">
       <label>Apps Script Web App URL</label>
-      <input type="text" id="sync-url-input" placeholder="https://script.google.com/macros/s/xxxxx/exec" 
-             style="width:100%; font-size:12px;">
+      <input type="text" id="sync-url-input" placeholder="https://script.google.com/macros/s/xxxxx/exec" style="width:100%;font-size:12px;">
     </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
       <button class="btn btn-secondary btn-sm" onclick="manualSyncFromSheet()">⬇ 從 Sheets 載入</button>
       <button class="btn btn-secondary btn-sm" onclick="manualPushToSheet()">⬆ 上傳至 Sheets</button>
     </div>
@@ -452,19 +168,18 @@
   </div>
 </div>
 
-<!-- ═══ AUTH MODAL ═══ -->
+<!-- Auth Modal -->
 <div class="modal-overlay hidden" id="auth-modal" onclick="if(event.target===this)this.classList.add('hidden')">
   <div class="modal">
     <h2>🔐 管理員登入</h2>
-    <p style="font-size:13px; color:var(--text-dim); margin-bottom:16px;">修改日期與刪除工單需要管理員權限</p>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">刪除工單需要管理員權限</p>
     <div class="form-group" style="margin-bottom:12px;">
       <label>代號</label>
       <input type="text" id="auth-uid" placeholder="請輸入代號" autocomplete="off">
     </div>
     <div class="form-group" style="margin-bottom:16px;">
       <label>密碼</label>
-      <input type="password" id="auth-pwd" placeholder="請輸入密碼" autocomplete="off"
-             onkeydown="if(event.key==='Enter')adminLogin()">
+      <input type="password" id="auth-pwd" placeholder="請輸入密碼" autocomplete="off" onkeydown="if(event.key==='Enter')adminLogin()">
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('auth-modal').classList.add('hidden')">取消</button>
@@ -473,27 +188,17 @@
   </div>
 </div>
 
-<!-- ═══ PAGE: 派工作業 ═══ -->
+<!-- 派工作業 -->
 <div class="main" id="page-dispatch">
-  <div class="page-header">
-    <h1>派工作業</h1>
-    <p>建立新的檢測工單，系統將依據人員證照資格自動建議派工名單</p>
-  </div>
-
+  <div class="page-header"><h1>派工作業</h1><p>建立新的檢測工單，系統將依據人員證照資格自動建議派工名單</p></div>
   <div class="card">
     <div class="card-title"><span class="icon">📝</span> 工單資訊</div>
     <div class="form-grid">
-      <div class="form-group">
-        <label>工號</label>
-        <input type="text" id="inp-workId" placeholder="例：WO-2026-001">
-      </div>
-      <div class="form-group">
-        <label>檢測項目名稱</label>
-        <input type="text" id="inp-projectName" placeholder="例：#1鍋爐水牆管檢測">
-      </div>
+      <div class="form-group"><label>工號</label><input type="text" id="inp-workId" placeholder="例：WO-2026-001"></div>
+      <div class="form-group"><label>檢測項目名稱</label><input type="text" id="inp-projectName" placeholder="例：#1 鍋爐水牆管檢測"></div>
       <div class="form-group">
         <label>檢測方法（可複選 1~4 種）</label>
-        <div id="method-checkboxes" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+        <div id="method-checkboxes" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
           <label class="method-chip"><input type="checkbox" value="PT" onchange="onMethodChange()"> PT 滲透</label>
           <label class="method-chip"><input type="checkbox" value="MT" onchange="onMethodChange()"> MT 磁粒</label>
           <label class="method-chip"><input type="checkbox" value="UT" onchange="onMethodChange()"> UT 超音波</label>
@@ -503,86 +208,48 @@
           <label class="method-chip"><input type="checkbox" value="LT" onchange="onMethodChange()"> LT 洩漏</label>
         </div>
       </div>
-      <div class="form-group">
-        <label>需求人數</label>
-        <input type="number" id="inp-count" min="1" max="29" value="3" placeholder="人數">
-      </div>
-      <div class="form-group">
-        <label>開始日期</label>
-        <input type="date" id="inp-startDate">
-      </div>
-      <div class="form-group">
-        <label>結束日期</label>
-        <input type="date" id="inp-endDate">
-      </div>
+      <div class="form-group"><label>需求人數</label><input type="number" id="inp-count" min="1" max="29" value="3"></div>
+      <div class="form-group"><label>開始日期</label><input type="date" id="inp-startDate"></div>
+      <div class="form-group"><label>結束日期</label><input type="date" id="inp-endDate"></div>
     </div>
   </div>
-
-  <!-- Suggestion -->
   <div class="suggestion-box hidden" id="suggestion-box">
     <h3>💡 系統建議派工人員</h3>
     <div id="suggestion-list"></div>
-    <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">
-      ※ Level II 以上人員優先，並確保每組至少有一名 Level II+ 帶領 Level I 或無證照人員
-    </p>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">※ Level II 以上人員優先，並確保每組至少有一名 Level II+ 帶領 Level I 或無證照人員</p>
   </div>
-
-  <!-- Personnel Selection -->
   <div class="card" id="personnel-select-card" style="margin-top:20px;">
     <div class="card-title"><span class="icon">👥</span> 勾選檢測人員</div>
     <div class="filter-bar">
       <input type="text" class="search-input" id="personnel-search" placeholder="搜尋人員姓名...">
-      <span style="font-size:12px; color:var(--text-dim);" id="selected-count">已選 0 人</span>
+      <span style="font-size:12px;color:var(--text-dim);" id="selected-count">已選 0 人</span>
     </div>
     <div class="personnel-grid" id="personnel-grid"></div>
   </div>
-
-  <div style="margin-top:20px; display:flex; gap:12px;">
+  <div style="margin-top:20px;display:flex;gap:12px;">
     <button class="btn btn-primary" onclick="submitDispatch()">✅ 確認派工</button>
     <button class="btn btn-secondary" onclick="clearForm()">🔄 清除表單</button>
   </div>
 </div>
 
-<!-- ═══ PAGE: 工號管理 ═══ -->
+<!-- 工號管理 -->
 <div class="main hidden" id="page-worklog">
-  <div class="page-header">
-    <h1>工號管理</h1>
-    <p>追蹤每一個檢測工號的進度、成本及完工狀態</p>
-  </div>
-
+  <div class="page-header"><h1>工號管理</h1><p>追蹤每一個檢測工號的進度、成本及完工狀態</p></div>
   <div class="daily-rate-bar">
     <label>💰 每人日建議價格：</label>
     <span style="color:var(--text-dim)">NT$</span>
-    <input type="text" class="cost-input" id="daily-rate" value="15,000"
-           oninput="saveDailyRate(this.value); renderWorklog();"
-           style="width:110px; font-size:14px; font-weight:700;">
-    <span style="color:var(--text-dim); font-size:12px;">元／人日</span>
+    <input type="text" class="cost-input" id="daily-rate" value="15,000" oninput="saveDailyRate(this.value);renderWorklog();" style="width:110px;font-size:14px;font-weight:700;">
+    <span style="color:var(--text-dim);font-size:12px;">元／人日</span>
   </div>
-
   <div class="card">
-    <div class="table-wrap" style="max-height:75vh; overflow:auto;">
+    <div class="table-wrap" style="max-height:75vh;overflow:auto;">
       <table>
-        <thead>
-          <tr>
-            <th>工號</th>
-            <th>檢測項目</th>
-            <th>檢測方法</th>
-            <th>檢測人員</th>
-            <th>開始日期</th>
-            <th>結束日期</th>
-            <th>人日數</th>
-            <th>報價</th>
-            <th>人力成本</th>
-            <th>物料成本</th>
-            <th>截至當日成本</th>
-            <th>建議報價</th>
-            <th>管制表</th>
-            <th>報告</th>
-            <th>完工</th>
-            <th>維護人</th>
-            <th>操作</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>工號</th><th>檢測項目</th><th>檢測方法</th><th>檢測人員</th>
+          <th>開始日期</th><th>結束日期</th><th>人日數</th><th>報價</th>
+          <th>人力成本</th><th>物料成本</th><th>截至當日成本</th><th>建議報價</th>
+          <th>管制表</th><th>報告</th><th>完工</th><th>維護人</th><th>操作</th>
+        </tr></thead>
         <tbody id="worklog-body"></tbody>
       </table>
     </div>
@@ -591,38 +258,21 @@
       <p>尚無工號資料，請先於「派工作業」頁面建立工單</p>
     </div>
   </div>
-
-  <!-- ═══ 完工區 ═══ -->
-  <div class="card hidden" id="completed-section" style="margin-top:16px; opacity:0.85;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; cursor:pointer;"
-         onclick="toggleCompletedSection()">
-      <h3 style="margin:0; font-size:15px; color:var(--accent2);">
-        ✅ 已完工工號 <span id="completed-count" style="font-size:13px; color:var(--text-dim);"></span>
-      </h3>
-      <span id="completed-toggle-icon" style="font-size:13px; color:var(--text-muted);">展開 ▼</span>
+  <!-- 已完工區 -->
+  <div class="card hidden" id="completed-section" style="margin-top:16px;opacity:0.85;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;cursor:pointer;" onclick="toggleCompletedSection()">
+      <h3 style="margin:0;font-size:15px;color:var(--accent2);">✅ 已完工工號 <span id="completed-count" style="font-size:13px;color:var(--text-dim);"></span></h3>
+      <span id="completed-toggle-icon" style="font-size:13px;color:var(--text-muted);">展開 ▼</span>
     </div>
     <div id="completed-content" style="display:none;">
-      <div class="table-wrap" style="max-height:50vh; overflow:auto;">
+      <div class="table-wrap" style="max-height:60vh;overflow:auto;">
         <table>
-          <thead>
-            <tr>
-              <th>工號</th>
-              <th>檢測項目</th>
-              <th>檢測方法</th>
-              <th>檢測人員</th>
-              <th>開始日期</th>
-              <th>結束日期</th>
-              <th>人日數</th>
-              <th>報價</th>
-              <th>截至當日成本</th>
-              <th>建議報價</th>
-              <th>管制表</th>
-              <th>報告</th>
-              <th>完工</th>
-              <th>維護人</th>
-              <th>操作</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>工號</th><th>檢測項目</th><th>檢測方法</th><th>檢測人員</th>
+            <th>開始日期</th><th>結束日期</th><th>人日數</th><th>報價</th>
+            <th>成本</th><th>建議報價</th>
+            <th>管制表</th><th>報告</th><th>完工</th><th>維護人</th><th>操作</th>
+          </tr></thead>
           <tbody id="completed-body"></tbody>
         </table>
       </div>
@@ -630,1336 +280,465 @@
   </div>
 </div>
 
-<!-- ═══ PAGE: 支援統計 ═══ -->
+<!-- 支援統計 -->
 <div class="main hidden" id="page-stats">
-  <div class="page-header">
-    <h1>支援統計</h1>
-    <p>以年度為單位，統計每位檢測人員的支援次數</p>
-  </div>
-
-  <div class="year-selector">
-    <label style="font-weight:600;">年度：</label>
-    <select id="stats-year" onchange="renderStats()"></select>
-  </div>
-
+  <div class="page-header"><h1>支援統計</h1><p>以年度為單位，統計每位檢測人員的支援次數</p></div>
+  <div class="year-selector"><label style="font-weight:600;">年度：</label><select id="stats-year" onchange="renderStats()"></select></div>
   <div class="stats-row" id="stats-summary"></div>
-
   <div class="card">
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>序號</th>
-            <th>姓名</th>
-            <th>PT</th><th>MT</th><th>UT</th><th>ET</th><th>RT</th><th>VT</th><th>LT</th>
-            <th>合計</th>
-          </tr>
-        </thead>
+        <thead><tr><th>序號</th><th>姓名</th><th>PT</th><th>MT</th><th>UT</th><th>ET</th><th>RT</th><th>VT</th><th>LT</th><th>合計</th></tr></thead>
         <tbody id="stats-body"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ═══ PAGE: 人員證照 ═══ -->
+<!-- 人員證照 -->
 <div class="main hidden" id="page-personnel">
-  <div class="page-header">
-    <h1>人員證照總覽</h1>
-    <p>管理檢測人員的 TPC 證照級數資料</p>
-  </div>
-
+  <div class="page-header"><h1>人員證照總覽</h1><p>管理檢測人員的 TPC 證照級數資料</p></div>
   <div class="card">
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>序號</th><th>姓名</th>
-            <th>PT</th><th>MT</th><th>UT</th><th>ET</th><th>RT</th><th>VT</th><th>LT</th>
-          </tr>
-        </thead>
+        <thead><tr><th>序號</th><th>姓名</th><th>PT</th><th>MT</th><th>UT</th><th>ET</th><th>RT</th><th>VT</th><th>LT</th></tr></thead>
         <tbody id="cert-body"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ═══ TOAST CONTAINER ═══ -->
 <div id="toast-container"></div>
 
 <script>
-// ═══════════════════════════════════════════
-//  DATA: Personnel Certifications (TPC levels)
-// ═══════════════════════════════════════════
+'use strict';
 const METHODS = ['PT','MT','UT','ET','RT','VT','LT'];
 
-// ═══ LOGIN SESSION (from Dashboard) ═══
-function getLoggedInUser() {
-  try {
-    const u = JSON.parse(sessionStorage.getItem('ndtUser'));
-    return u || null;
-  } catch { return null; }
-}
-function isGuest() {
-  const u = getLoggedInUser();
-  return u && u.role === 'guest';
-}
+function getLoggedInUser(){try{return JSON.parse(sessionStorage.getItem('ndtUser'))||null;}catch{return null;}}
+function isGuest(){const u=getLoggedInUser();return u&&u.role==='guest';}
 
-// ═══ DISPATCH SYNC TO GOOGLE SHEETS (hardcoded, hidden) ═══
-const _DSK = 'AKfycbyHiEgKQvkPEA0fF0vs2aeg8P9W1rogruFAGhMNx2mKJR69KCSIGqma_CiL1Q67z1xd';
-function getDispatchSyncUrl() { return 'https://script.google.com/macros/s/' + _DSK + '/exec'; }
+const _DSK='AKfycbyHiEgKQvkPEA0fF0vs2aeg8P9W1rogruFAGhMNx2mKJR69KCSIGqma_CiL1Q67z1xd';
+function getDispatchSyncUrl(){return 'https://script.google.com/macros/s/'+_DSK+'/exec';}
+function syncDispatchToSheet(order){try{fetch(getDispatchSyncUrl()+'?action=addDispatch&data='+encodeURIComponent(JSON.stringify(order)),{redirect:'follow'}).catch(e=>console.warn(e));}catch(e){}}
 
-function syncDispatchToSheet(order) {
-  try {
-    var url = getDispatchSyncUrl()
-      + '?action=addDispatch&data=' + encodeURIComponent(JSON.stringify(order));
-    fetch(url, { redirect: 'follow' })
-      .then(function(r) { return r.text(); })
-      .then(function(t) { console.log('✅ 派工已同步至 Google Sheets:', t); })
-      .catch(function(err) { console.warn('派工同步失敗:', err); });
-  } catch(e) { console.warn('syncDispatchToSheet error:', e); }
-}
-
-let personnelData = [
-  {id:1,name:"蘇逸彥",PT:3,MT:3,UT:2,ET:2,RT:2,VT:3,LT:2},
-  {id:2,name:"蔡武哲",PT:3,MT:3,UT:3,ET:3,RT:3,VT:3,LT:2},
-  {id:3,name:"林炳宏",PT:3,MT:3,UT:3,ET:3,RT:2,VT:3,LT:2},
-  {id:4,name:"林宏儒",PT:3,MT:2,UT:3,ET:3,RT:2,VT:3,LT:0},
-  {id:5,name:"林士瑄",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
-  {id:6,name:"陳柏均",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
-  {id:7,name:"黃鴻鈞",PT:2,MT:2,UT:2,ET:2,RT:1,VT:2,LT:1},
-  {id:8,name:"李家緯",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:9,name:"吳志成",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:2},
-  {id:10,name:"黃嵩捷",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:11,name:"楊竣宇",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:2},
-  {id:12,name:"鍾銘軒",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:13,name:"李振誠",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:14,name:"陳政瑋",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
-  {id:15,name:"吳宇軒",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
-  {id:16,name:"徐振華",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:17,name:"呂侑儒",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:18,name:"李晨鍠",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
-  {id:19,name:"張謙凌",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:20,name:"邱重豪",PT:2,MT:2,UT:1,ET:2,RT:1,VT:2,LT:0},
-  {id:21,name:"廖元瑜",PT:2,MT:2,UT:1,ET:1,RT:1,VT:2,LT:0},
-  {id:22,name:"張志玄",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
-  {id:23,name:"李昇晉",PT:2,MT:2,UT:2,ET:2,RT:2,VT:1,LT:0},
-  {id:24,name:"張瑋岑",PT:2,MT:2,UT:2,ET:1,RT:0,VT:2,LT:0},
-  {id:25,name:"蔡瀚承",PT:2,MT:1,UT:2,ET:1,RT:1,VT:1,LT:0},
-  {id:26,name:"朱彥豪",PT:2,MT:2,UT:2,ET:2,RT:1,VT:2,LT:0},
-  {id:27,name:"陳擎",PT:2,MT:2,UT:1,ET:0,RT:0,VT:1,LT:1},
-  {id:28,name:"吳祖年",PT:2,MT:2,UT:2,ET:2,RT:1,VT:2,LT:1},
-  {id:29,name:"陳廉淞",PT:2,MT:2,UT:0,ET:1,RT:0,VT:2,LT:0},
-  {id:30,name:"陳嘉濬",PT:2,MT:2,UT:1,ET:0,RT:0,VT:2,LT:0},
-  {id:31,name:"曾建銘",PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
-  {id:32,name:"王于任",PT:2,MT:2,UT:2,ET:0,RT:0,VT:2,LT:0},
-  {id:33,name:"吳喬隆",PT:1,MT:1,UT:0,ET:0,RT:0,VT:2,LT:0},
-  {id:34,name:"李祐誠",PT:1,MT:1,UT:0,ET:0,RT:0,VT:2,LT:0},
-  {id:35,name:"吳忠憲",PT:1,MT:1,UT:0,ET:0,RT:0,VT:1,LT:0},
-  {id:36,name:"王冠博",PT:1,MT:1,UT:0,ET:0,RT:0,VT:1,LT:0},
-  {id:37,name:"楊智名",PT:1,MT:1,UT:0,ET:0,RT:0,VT:1,LT:0},
-  {id:38,name:"林時沂",PT:1,MT:0,UT:0,ET:0,RT:0,VT:1,LT:0},
-  {id:39,name:"張綺真",PT:0,MT:0,UT:0,ET:0,RT:0,VT:1,LT:0},
-  {id:40,name:"陳思豪",PT:0,MT:0,UT:0,ET:0,RT:0,VT:0,LT:0}
+const personnelData=[
+  {id:2,name:'蔡武哲',PT:3,MT:3,UT:3,ET:3,RT:3,VT:3,LT:2},
+  {id:3,name:'林炳宏',PT:2,MT:3,UT:3,ET:2,RT:2,VT:3,LT:2},
+  {id:4,name:'林宏儒',PT:3,MT:2,UT:3,ET:3,RT:2,VT:3,LT:0},
+  {id:5,name:'林士瑄',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
+  {id:6,name:'陳柏均',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
+  {id:7,name:'黃鴻鈞',PT:2,MT:2,UT:2,ET:2,RT:1,VT:2,LT:0},
+  {id:8,name:'李家緯',PT:2,MT:2,UT:2,ET:2,RT:0,VT:1,LT:0},
+  {id:9,name:'吳志成',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:2},
+  {id:10,name:'黃嵩捷',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
+  {id:11,name:'楊竣宇',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:2},
+  {id:12,name:'鍾銘軒',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
+  {id:13,name:'李振誠',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:1},
+  {id:14,name:'陳政瑋',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
+  {id:15,name:'吳宇軒',PT:2,MT:2,UT:2,ET:1,RT:2,VT:1,LT:0},
+  {id:16,name:'徐振華',PT:2,MT:2,UT:2,ET:2,RT:1,VT:2,LT:0},
+  {id:17,name:'呂侑儒',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
+  {id:18,name:'曾建銘',PT:2,MT:2,UT:2,ET:2,RT:2,VT:2,LT:0},
+  {id:19,name:'李晨鍠',PT:2,MT:2,UT:2,ET:1,RT:2,VT:2,LT:0},
+  {id:20,name:'張謙凌',PT:2,MT:2,UT:1,ET:1,RT:2,VT:2,LT:0},
+  {id:21,name:'邱重豪',PT:2,MT:2,UT:1,ET:2,RT:1,VT:2,LT:0},
+  {id:22,name:'廖元瑜',PT:2,MT:2,UT:1,ET:1,RT:1,VT:2,LT:0},
+  {id:23,name:'張志玄',PT:2,MT:2,UT:2,ET:2,RT:1,VT:2,LT:0},
+  {id:24,name:'李昇晉',PT:2,MT:2,UT:2,ET:1,RT:1,VT:1,LT:0},
+  {id:25,name:'張瑋岑',PT:1,MT:1,UT:2,ET:1,RT:0,VT:1,LT:0},
+  {id:26,name:'蔡瀚承',PT:2,MT:1,UT:2,ET:1,RT:1,VT:1,LT:0},
+  {id:27,name:'朱彥豪',PT:2,MT:2,UT:2,ET:1,RT:1,VT:2,LT:0},
+  {id:28,name:'陳擎',PT:2,MT:1,UT:1,ET:0,RT:0,VT:1,LT:0},
+  {id:29,name:'吳祖年',PT:2,MT:2,UT:1,ET:1,RT:1,VT:1,LT:1},
+  {id:30,name:'陳廉淞',PT:1,MT:1,UT:0,ET:1,RT:0,VT:1,LT:0}
 ];
 
-// ═══ PERSISTENCE (Google Sheets + localStorage cache) ═══
-// 請將此 URL 替換為你的 Google Apps Script Web App URL
-const GAS_URL = localStorage.getItem('ndt_gas_url') || '';
+function loadWorkOrders(){try{return JSON.parse(localStorage.getItem('ndt_workorders')||'[]');}catch{return[];}}
+function saveWorkOrders(d){localStorage.setItem('ndt_workorders',JSON.stringify(d));syncToSheet(d);}
+let _st=null;
+function syncToSheet(d){if(!getGasUrl())return;clearTimeout(_st);_st=setTimeout(()=>{fetch(getGasUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'save',data:d})}).catch(e=>console.warn(e));},1500);}
 
-// localStorage 作為快取，Google Sheets 作為主要儲存
-function loadWorkOrders() {
-  try { return JSON.parse(localStorage.getItem('ndt_workorders') || '[]'); } catch { return []; }
+function normalizeOrder(r){
+  if(r.workId!==undefined)return r;
+  const p=(r['檢測人員']||'').toString();
+  return{workId:r['工號']||'',projectName:r['檢測項目']||'',method:r['檢測方法']||'',
+    personnel:p?p.split('、'):[],startDate:r['開始日期']||'',endDate:r['結束日期']||'',
+    manDays:Number(r['人日數'])||0,quote:Number(r['報價'])||0,
+    processControl:r['管制表']==='是',report:r['報告']==='是',completed:r['完工']==='是',
+    maintainer:r['維護人']||'',laborCosts:r.laborCosts||[],materialCosts:r.materialCosts||[]};
 }
-function saveWorkOrders(data) {
-  localStorage.setItem('ndt_workorders', JSON.stringify(data));
-  syncToSheet(data);  // 非同步寫入 Google Sheets
-}
-
-// ─── 同步到 Google Sheets ───
-let syncTimer = null;
-function syncToSheet(data) {
-  if (!getGasUrl()) return;
-  // Debounce: 連續操作只送最後一次（1.5秒後）
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => {
-    fetch(getGasUrl(), {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'save', data: data })
-    }).catch(err => console.warn('Sheets sync failed:', err));
-  }, 1500);
-}
-
-// ─── 中文 key → 英文 key 對照（安全 fallback） ───
-function normalizeOrder(r) {
-  if (r.workId !== undefined) return r;  // 已經是英文 key
-  var personnel = (r['檢測人員'] || '').toString();
-  var personnelArr = personnel ? personnel.split('、') : [];
-  return {
-    workId: r['工號'] || '',
-    projectName: r['檢測項目'] || '',
-    method: r['檢測方法'] || '',
-    personnel: personnelArr,
-    startDate: r['開始日期'] || '',
-    endDate: r['結束日期'] || '',
-    manDays: Number(r['人日數']) || 0,
-    quote: Number(r['報價']) || 0,
-    processControl: r['管制表'] === '是',
-    report: r['報告'] === '是',
-    completed: r['完工'] === '是',
-    maintainer: r['維護人'] || '',
-    laborCosts: r.laborCosts || [],
-    materialCosts: r.materialCosts || []
-  };
-}
-
-// ─── 從 Google Sheets 載入 ───
-async function loadFromSheet() {
-  if (!getGasUrl()) return null;
-  try {
+async function loadFromSheet(){
+  if(!getGasUrl())return null;
+  try{
     showToast('☁ 正在從 Google Sheets 載入...');
-    const res = await fetch(getGasUrl() + '?action=load');
-    const json = await res.json();
-    if (json.status === 'ok' && Array.isArray(json.data)) {
-      // 確保資料使用英文 key（相容舊版 Apps Script）
-      const normalized = json.data.map(normalizeOrder);
-      localStorage.setItem('ndt_workorders', JSON.stringify(normalized));
-      showToast(`✅ 已從 Sheets 載入 ${normalized.length} 筆工單`);
+    const res=await fetch(getGasUrl()+'?action=load');
+    const json=await res.json();
+    if(json.status==='ok'&&Array.isArray(json.data)){
+      const normalized=json.data.map(normalizeOrder);
+      localStorage.setItem('ndt_workorders',JSON.stringify(normalized));
+      showToast('✅ 已從 Sheets 載入 '+normalized.length+' 筆工單');
       return normalized;
     }
-  } catch (err) {
-    console.warn('Load from Sheets failed:', err);
-    showToast('⚠ 無法連線 Sheets，使用本地快取', 'warn');
-  }
+  }catch(err){console.warn(err);showToast('⚠ 無法連線 Sheets，使用本地快取','warn');}
   return null;
 }
-
-function getGasUrl() {
-  return localStorage.getItem('ndt_gas_url') || '';
-}
-
-function saveGasUrl(url) {
-  localStorage.setItem('ndt_gas_url', url.trim());
-}
-
-// ─── 設定面板 ───
-function showSyncSettings() {
-  document.getElementById('sync-url-input').value = getGasUrl();
-  document.getElementById('sync-modal').classList.remove('hidden');
-}
-
-async function saveSyncSettings() {
-  const url = document.getElementById('sync-url-input').value.trim();
-  saveGasUrl(url);
+function getGasUrl(){return localStorage.getItem('ndt_gas_url')||'';}
+function saveGasUrl(url){localStorage.setItem('ndt_gas_url',url.trim());}
+function showSyncSettings(){document.getElementById('sync-url-input').value=getGasUrl();document.getElementById('sync-modal').classList.remove('hidden');}
+async function saveSyncSettings(){
+  const url=document.getElementById('sync-url-input').value.trim();saveGasUrl(url);
   document.getElementById('sync-modal').classList.add('hidden');
-  if (url) {
-    const data = await loadFromSheet();
-    if (data) {
-      // 重新渲染當前頁面
-      const visiblePage = document.querySelector('.main:not(.hidden)');
-      if (visiblePage) {
-        if (visiblePage.id === 'page-worklog') renderWorklog();
-        if (visiblePage.id === 'page-stats') renderStats();
-      }
-    }
-    showToast('✅ Google Sheets 連線設定已儲存');
-  } else {
-    showToast('已清除 Sheets 連線（僅使用本地儲存）');
-  }
+  if(url){const data=await loadFromSheet();if(data){const vp=document.querySelector('.main:not(.hidden)');if(vp){if(vp.id==='page-worklog')renderWorklog();if(vp.id==='page-stats')renderStats();}}showToast('✅ Google Sheets 連線設定已儲存');}
+  else showToast('已清除 Sheets 連線（僅使用本地儲存）');
+}
+async function manualSyncFromSheet(){const data=await loadFromSheet();if(data){const vp=document.querySelector('.main:not(.hidden)');if(vp){if(vp.id==='page-worklog')renderWorklog();if(vp.id==='page-stats')renderStats();}}}
+async function manualPushToSheet(){
+  if(!getGasUrl()){showToast('請先設定 Google Sheets URL','warn');return;}
+  const data=loadWorkOrders();
+  try{showToast('☁ 正在上傳至 Google Sheets...');await fetch(getGasUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'save',data:data})});showToast('✅ 已將 '+data.length+' 筆工單上傳至 Sheets');}
+  catch(err){showToast('⚠ 上傳失敗','warn');}
 }
 
-async function manualSyncFromSheet() {
-  const data = await loadFromSheet();
-  if (data) {
-    const visiblePage = document.querySelector('.main:not(.hidden)');
-    if (visiblePage) {
-      if (visiblePage.id === 'page-worklog') renderWorklog();
-      if (visiblePage.id === 'page-stats') renderStats();
-    }
-  }
+const AUTH_HASH='5caaa946305e4ebb2aa470040afd76a212c04b53cc58a54fb34b5c2e081d06cb';
+let isAdmin=false;
+async function sha256(text){const enc=new TextEncoder();const d=enc.encode(text);const h=await crypto.subtle.digest('SHA-256',d);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function adminLogin(){
+  const uid=document.getElementById('auth-uid').value.trim();
+  const pwd=document.getElementById('auth-pwd').value.trim();
+  if(!uid||!pwd){showToast('請輸入代號與密碼','warn');return;}
+  const hash=await sha256(uid+':'+pwd);
+  if(hash===AUTH_HASH){isAdmin=true;sessionStorage.setItem('ndt_admin','1');document.getElementById('auth-modal').classList.add('hidden');showToast('✅ 管理員登入成功');updateAdminUI();}
+  else showToast('代號或密碼錯誤','warn');
+}
+function adminLogout(){isAdmin=false;sessionStorage.removeItem('ndt_admin');showToast('已登出管理員');updateAdminUI();if(!document.getElementById('page-worklog').classList.contains('hidden'))renderWorklog();}
+function showAuthModal(){document.getElementById('auth-uid').value='';document.getElementById('auth-pwd').value='';document.getElementById('auth-modal').classList.remove('hidden');}
+function checkAdminSession(){if(sessionStorage.getItem('ndt_admin')==='1')isAdmin=true;}
+function updateAdminUI(){
+  const lb=document.getElementById('admin-login-btn'),lo=document.getElementById('admin-logout-btn'),bd=document.getElementById('admin-badge');
+  if(isAdmin){lb.classList.add('hidden');lo.classList.remove('hidden');bd.classList.remove('hidden');}
+  else{lb.classList.remove('hidden');lo.classList.add('hidden');bd.classList.add('hidden');}
+  if(!document.getElementById('page-worklog').classList.contains('hidden'))renderWorklog();
 }
 
-async function manualPushToSheet() {
-  if (!getGasUrl()) { showToast('請先設定 Google Sheets URL', 'warn'); return; }
-  const data = loadWorkOrders();
-  try {
-    showToast('☁ 正在上傳至 Google Sheets...');
-    await fetch(getGasUrl(), {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'save', data: data })
-    });
-    showToast(`✅ 已將 ${data.length} 筆工單上傳至 Sheets`);
-  } catch (err) {
-    showToast('⚠ 上傳失敗', 'warn');
-  }
+function showPage(page){
+  document.querySelectorAll('.main').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('page-'+page).classList.remove('hidden');
+  document.querySelectorAll('.nav-tab').forEach((tab,i)=>tab.classList.toggle('active',['dispatch','worklog','stats','personnel'][i]===page));
+  if(page==='worklog')renderWorklog();if(page==='stats')renderStats();if(page==='personnel')renderCertTable();
 }
 
-// ═══ AUTH (管理員權限) ═══
-const AUTH_HASH = '5caaa946305e4ebb2aa470040afd76a212c04b53cc58a54fb34b5c2e081d06cb';
-let isAdmin = false;
+function levelBadge(lv){const l={3:'Ⅲ',2:'Ⅱ',1:'Ⅰ',0:'—'};return '<span class="badge badge-'+lv+'">'+l[lv]+'</span>';}
+function renderCertTable(){document.getElementById('cert-body').innerHTML=personnelData.map(p=>'<tr><td>'+p.id+'</td><td style="font-weight:600">'+p.name+'</td>'+METHODS.map(m=>'<td>'+levelBadge(p[m])+'</td>').join('')+'</tr>').join('');}
 
-async function sha256(text) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+let selectedPersonnel=new Set();
+function getSelectedMethods(){return[...document.querySelectorAll('#method-checkboxes input:checked')].map(cb=>cb.value);}
+function onMethodChange(){
+  const methods=getSelectedMethods();
+  if(methods.length>4){event.target.checked=false;showToast('最多選擇 4 種檢測方法','warn');return;}
+  generateSuggestion();renderPersonnelGrid();
 }
-
-async function adminLogin() {
-  const uid = document.getElementById('auth-uid').value.trim();
-  const pwd = document.getElementById('auth-pwd').value.trim();
-  if (!uid || !pwd) { showToast('請輸入代號與密碼', 'warn'); return; }
-  const hash = await sha256(uid + ':' + pwd);
-  if (hash === AUTH_HASH) {
-    isAdmin = true;
-    sessionStorage.setItem('ndt_admin', '1');
-    document.getElementById('auth-modal').classList.add('hidden');
-    showToast('✅ 管理員登入成功');
-    updateAdminUI();
-  } else {
-    showToast('代號或密碼錯誤', 'warn');
-  }
-}
-
-function adminLogout() {
-  isAdmin = false;
-  sessionStorage.removeItem('ndt_admin');
-  showToast('已登出管理員');
-  updateAdminUI();
-  if (!document.getElementById('page-worklog').classList.contains('hidden')) renderWorklog();
-}
-
-function showAuthModal() {
-  document.getElementById('auth-uid').value = '';
-  document.getElementById('auth-pwd').value = '';
-  document.getElementById('auth-modal').classList.remove('hidden');
-}
-
-function checkAdminSession() {
-  if (sessionStorage.getItem('ndt_admin') === '1') isAdmin = true;
-}
-
-function updateAdminUI() {
-  const loginBtn = document.getElementById('admin-login-btn');
-  const logoutBtn = document.getElementById('admin-logout-btn');
-  const badge = document.getElementById('admin-badge');
-  if (isAdmin) {
-    loginBtn.classList.add('hidden');
-    logoutBtn.classList.remove('hidden');
-    badge.classList.remove('hidden');
-  } else {
-    loginBtn.classList.remove('hidden');
-    logoutBtn.classList.add('hidden');
-    badge.classList.add('hidden');
-  }
-  // Re-render worklog if visible
-  if (!document.getElementById('page-worklog').classList.contains('hidden')) renderWorklog();
-}
-
-// ═══ PAGE SWITCHING ═══
-function showPage(page) {
-  document.querySelectorAll('.main').forEach(el => el.classList.add('hidden'));
-  document.getElementById('page-' + page).classList.remove('hidden');
-  document.querySelectorAll('.nav-tab').forEach((tab, i) => {
-    tab.classList.toggle('active', ['dispatch','worklog','stats','personnel'][i] === page);
-  });
-  if (page === 'worklog') renderWorklog();
-  if (page === 'stats') renderStats();
-  if (page === 'personnel') renderCertTable();
-}
-
-// ═══ LEVEL BADGE ═══
-function levelBadge(lv) {
-  const labels = {3:'Ⅲ', 2:'Ⅱ', 1:'Ⅰ', 0:'—'};
-  return `<span class="badge badge-${lv}">${labels[lv]}</span>`;
-}
-
-// ═══ RENDER CERT TABLE ═══
-function renderCertTable() {
-  const tbody = document.getElementById('cert-body');
-  tbody.innerHTML = personnelData.map(p => `
-    <tr>
-      <td>${p.id}</td><td style="font-weight:600">${p.name}</td>
-      ${METHODS.map(m => `<td>${levelBadge(p[m])}</td>`).join('')}
-    </tr>
-  `).join('');
-}
-
-// ═══ PERSONNEL SELECTION GRID ═══
-let selectedPersonnel = new Set();
-
-function getSelectedMethods() {
-  return [...document.querySelectorAll('#method-checkboxes input:checked')].map(cb => cb.value);
-}
-
-function onMethodChange() {
-  const methods = getSelectedMethods();
-  if (methods.length > 4) {
-    event.target.checked = false;
-    showToast('最多選擇 4 種檢測方法', 'warn');
-    return;
-  }
-  generateSuggestion();
-  renderPersonnelGrid();
-}
-
-function renderPersonnelGrid() {
-  const methods = getSelectedMethods();
-  const search = document.getElementById('personnel-search').value.trim();
-  const grid = document.getElementById('personnel-grid');
-
-  grid.innerHTML = personnelData.map(p => {
-    const matchSearch = !search || p.name.includes(search);
-    if (!matchSearch) return '';
-
-    // 人員需要在所有選定方法中至少有 Level 1
-    let disabled = false;
-    let levelInfo = '';
-    if (methods.length > 0) {
-      const allZero = methods.every(m => p[m] === 0);
-      disabled = allZero;
-      levelInfo = methods.map(m => {
-        const lv = p[m];
-        const label = lv === 3 ? 'III' : lv === 2 ? 'II' : lv === 1 ? 'I' : '—';
-        return `<span class="badge badge-${lv}" style="font-size:10px;padding:1px 6px;">${m}:${label}</span>`;
-      }).join(' ');
-    }
-
-    return `
-      <div class="personnel-item ${selectedPersonnel.has(p.id) ? 'selected' : ''} ${disabled ? 'disabled' : ''}"
-           onclick="togglePerson(${p.id})">
-        <input type="checkbox" ${selectedPersonnel.has(p.id) ? 'checked' : ''} ${disabled ? 'disabled' : ''}>
-        <span class="name">${p.name}</span>
-        <span class="level" style="display:flex;gap:3px;flex-wrap:wrap;">${levelInfo}</span>
-      </div>
-    `;
+function renderPersonnelGrid(){
+  const methods=getSelectedMethods();const search=document.getElementById('personnel-search').value.trim();
+  document.getElementById('personnel-grid').innerHTML=personnelData.map(p=>{
+    if(search&&!p.name.includes(search))return'';
+    let disabled=false,levelInfo='';
+    if(methods.length>0){disabled=methods.every(m=>p[m]===0);levelInfo=methods.map(m=>{const lv=p[m];const lbl=lv===3?'III':lv===2?'II':lv===1?'I':'—';return'<span class="badge badge-'+lv+'" style="font-size:10px;padding:1px 6px;">'+m+':'+lbl+'</span>';}).join(' ');}
+    return'<div class="personnel-item '+(selectedPersonnel.has(p.id)?'selected':'')+' '+(disabled?'disabled':'')+'" onclick="togglePerson('+p.id+')">'
+      +'<input type="checkbox" '+(selectedPersonnel.has(p.id)?'checked ':'')+''+(disabled?'disabled ':'')+'/>'
+      +'<span class="name">'+p.name+'</span><span class="level" style="display:flex;gap:3px;flex-wrap:wrap;">'+levelInfo+'</span></div>';
   }).join('');
-
-  document.getElementById('selected-count').textContent = `已選 ${selectedPersonnel.size} 人`;
+  document.getElementById('selected-count').textContent='已選 '+selectedPersonnel.size+' 人';
 }
+function togglePerson(id){if(selectedPersonnel.has(id))selectedPersonnel.delete(id);else selectedPersonnel.add(id);renderPersonnelGrid();}
 
-function togglePerson(id) {
-  if (selectedPersonnel.has(id)) selectedPersonnel.delete(id);
-  else selectedPersonnel.add(id);
-  renderPersonnelGrid();
-}
-
-// ═══ SUGGESTION ENGINE ═══
-function getPersonnelSupportCounts() {
-  // 計算每位人員的總支援次數（當年度）
-  const orders = loadWorkOrders();
-  const currentYear = new Date().getFullYear();
-  const filtered = orders.filter(o => (o.year || new Date(o.startDate).getFullYear()) === currentYear);
-  const counts = {};
-  personnelData.forEach(p => counts[p.name] = 0);
-  filtered.forEach(o => {
-    (o.personnel || []).forEach(name => {
-      if (counts[name] !== undefined) counts[name]++;
-    });
-  });
+function getPersonnelSupportCounts(){
+  const orders=loadWorkOrders();const yr=new Date().getFullYear();
+  const filtered=orders.filter(o=>(o.year||new Date(o.startDate).getFullYear())===yr);
+  const counts={};personnelData.forEach(p=>counts[p.name]=0);
+  filtered.forEach(o=>(o.personnel||[]).forEach(name=>{if(counts[name]!==undefined)counts[name]++;}));
   return counts;
 }
-
-function generateSuggestion() {
-  const methods = getSelectedMethods();
-  const count = parseInt(document.getElementById('inp-count').value) || 3;
-  const box = document.getElementById('suggestion-box');
-  const list = document.getElementById('suggestion-list');
-
-  if (methods.length === 0) { box.classList.add('hidden'); return; }
-
-  const supportCounts = getPersonnelSupportCounts();
-
-  // 判定每人對所有選定方法的最低級數（取最低者作為整體資格）
-  const withMinLevel = personnelData.map(p => {
-    const minLevel = Math.min(...methods.map(m => p[m]));
-    return { ...p, minLevel, supportCount: supportCounts[p.name] || 0 };
-  });
-
-  // 篩選：至少所有方法都 >= 1
-  const qualified = withMinLevel.filter(p => p.minLevel >= 1);
-
-  // 排序邏輯：
-  // 1. Level II+ 優先（確保有帶隊人員）
-  // 2. 同級數中，支援次數少的優先（均衡派工）
-  // 3. 次數相同時，級數高的優先
-  const level2plus = qualified
-    .filter(p => p.minLevel >= 2)
-    .sort((a, b) => a.supportCount - b.supportCount || b.minLevel - a.minLevel);
-
-  const level1 = qualified
-    .filter(p => p.minLevel === 1)
-    .sort((a, b) => a.supportCount - b.supportCount);
-
-  let suggested = [];
-  if (count <= level2plus.length) {
-    suggested = level2plus.slice(0, count);
-  } else {
-    suggested = [...level2plus, ...level1.slice(0, count - level2plus.length)];
+function generateSuggestion(){
+  const methods=getSelectedMethods();const count=parseInt(document.getElementById('inp-count').value)||3;
+  const box=document.getElementById('suggestion-box');const list=document.getElementById('suggestion-list');
+  if(!methods.length){box.classList.add('hidden');return;}
+  const sc=getPersonnelSupportCounts();
+  const wml=personnelData.map(p=>({...p,minLevel:Math.min(...methods.map(m=>p[m])),supportCount:sc[p.name]||0}));
+  const qualified=wml.filter(p=>p.minLevel>=1);
+  const l2=qualified.filter(p=>p.minLevel>=2).sort((a,b)=>a.supportCount-b.supportCount||b.minLevel-a.minLevel);
+  const l1=qualified.filter(p=>p.minLevel===1).sort((a,b)=>a.supportCount-b.supportCount);
+  let suggested=(count<=l2.length?l2.slice(0,count):[...l2,...l1.slice(0,count-l2.length)]).slice(0,count);
+  if(!suggested.length){list.innerHTML='<p style="color:var(--text-muted)">無同時符合所有檢測方法資格的人員</p>';}
+  else{
+    list.innerHTML=suggested.map(p=>{const cls=p.minLevel===3?'badge-3':p.minLevel===2?'badge-2':'badge-1';const lbl=p.minLevel===3?'III':p.minLevel===2?'II':'I';return'<span class="suggestion-tag"><span class="badge '+cls+'">'+lbl+'</span> '+p.name+'<span style="font-size:11px;color:var(--text-muted);margin-left:2px;">('+p.supportCount+'次)</span></span>';}).join('');
+    if(!suggested.some(p=>p.minLevel>=2))list.innerHTML+='<p style="color:var(--danger);font-size:13px;margin-top:8px;">⚠ 警告：建議名單中無 Level II 以上人員帶領</p>';
   }
-  suggested = suggested.slice(0, count);
-
-  if (suggested.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-muted)">無同時符合所有檢測方法資格的人員</p>';
-  } else {
-    const hasLead = suggested.some(p => p.minLevel >= 2);
-    list.innerHTML = suggested.map(p => {
-      const cls = p.minLevel === 3 ? 'badge-3' : p.minLevel === 2 ? 'badge-2' : 'badge-1';
-      const label = p.minLevel === 3 ? 'III' : p.minLevel === 2 ? 'II' : 'I';
-      return `<span class="suggestion-tag">
-        <span class="badge ${cls}">${label}</span> ${p.name}
-        <span style="font-size:11px;color:var(--text-muted);margin-left:2px;">(${p.supportCount}次)</span>
-      </span>`;
-    }).join('');
-
-    if (!hasLead) {
-      list.innerHTML += '<p style="color:var(--danger); font-size:13px; margin-top:8px;">⚠ 警告：建議名單中無 Level II 以上人員帶領</p>';
-    }
-  }
-
-  box.classList.remove('hidden');
-
-  // Auto-select suggested
-  selectedPersonnel.clear();
-  suggested.forEach(p => selectedPersonnel.add(p.id));
-  renderPersonnelGrid();
+  box.classList.remove('hidden');selectedPersonnel.clear();suggested.forEach(p=>selectedPersonnel.add(p.id));renderPersonnelGrid();
 }
+document.getElementById('inp-count').addEventListener('input',generateSuggestion);
+document.getElementById('personnel-search').addEventListener('input',renderPersonnelGrid);
 
-// ═══ EVENT LISTENERS ═══
-document.getElementById('inp-count').addEventListener('input', generateSuggestion);
-document.getElementById('personnel-search').addEventListener('input', renderPersonnelGrid);
-
-// ═══ SUBMIT DISPATCH ═══
-function submitDispatch() {
-  const workId = document.getElementById('inp-workId').value.trim();
-  const projectName = document.getElementById('inp-projectName').value.trim();
-  const methods = getSelectedMethods();
-  const startDate = document.getElementById('inp-startDate').value;
-  const endDate = document.getElementById('inp-endDate').value;
-
-  if (!workId || !projectName || methods.length === 0 || !startDate || !endDate) {
-    showToast('請填寫所有必填欄位（含至少一種檢測方法）', 'warn');
-    return;
-  }
-  if (selectedPersonnel.size === 0) {
-    showToast('請至少選擇一位檢測人員', 'warn');
-    return;
-  }
-
-  // Check: at least one Level II+ across all methods
-  const selected = personnelData.filter(p => selectedPersonnel.has(p.id));
-  const hasLead = selected.some(p => methods.every(m => p[m] >= 2));
-  if (!hasLead) {
-    // 退一步：至少有人在任一方法是 Level II+
-    const hasAnyLead = selected.some(p => methods.some(m => p[m] >= 2));
-    if (!hasAnyLead) {
-      showToast('⚠ 至少需要一位 Level II 以上人員帶領', 'warn');
-      return;
-    }
-  }
-
-  const orders = loadWorkOrders();
-  if (orders.find(o => o.workId === workId)) {
-    showToast('此工號已存在', 'warn');
-    return;
-  }
-
-  const names = selected.map(p => p.name);
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const days = Math.max(1, Math.ceil((end - start) / 86400000) + 1);
-  const manDays = days * selected.length;
-  const user = getLoggedInUser();
-
-  const newOrder = {
-    workId,
-    projectName,
-    method: methods.join('+'),
-    methods: methods,
-    personnel: names,
-    personnelIds: [...selectedPersonnel],
-    startDate,
-    endDate,
-    manDays,
-    processControl: false,
-    report: false,
-    completed: false,
-    year: start.getFullYear(),
-    maintainer: user ? user.account : ''
-  };
-
-  orders.push(newOrder);
-  saveWorkOrders(orders);
-
-  // 自動同步到 Google Sheets
-  syncDispatchToSheet(newOrder);
-
-  showToast(`工號 ${workId} 派工完成！已派 ${names.length} 人，${methods.join('+')} 檢測`);
+function submitDispatch(){
+  const workId=document.getElementById('inp-workId').value.trim();
+  const projectName=document.getElementById('inp-projectName').value.trim();
+  const methods=getSelectedMethods();
+  const startDate=document.getElementById('inp-startDate').value;
+  const endDate=document.getElementById('inp-endDate').value;
+  if(!workId||!projectName||!methods.length||!startDate||!endDate){showToast('請填寫所有必填欄位（含至少一種檢測方法）','warn');return;}
+  if(!selectedPersonnel.size){showToast('請至少選擇一位檢測人員','warn');return;}
+  const selected=personnelData.filter(p=>selectedPersonnel.has(p.id));
+  if(!selected.some(p=>methods.some(m=>p[m]>=2))){showToast('⚠ 至少需要一位 Level II 以上人員帶領','warn');return;}
+  const orders=loadWorkOrders();
+  const names=selected.map(p=>p.name);
+  const start=new Date(startDate);const end=new Date(endDate);
+  const days=Math.max(1,Math.ceil((end-start)/86400000)+1);
+  const user=getLoggedInUser();
+  const newOrder={workId,projectName,method:methods.join('+'),methods,personnel:names,personnelIds:[...selectedPersonnel],
+    startDate,endDate,manDays:days*selected.length,manDaysOverride:false,
+    processControl:false,report:false,completed:false,year:start.getFullYear(),
+    maintainer:user?user.account:'',laborCosts:[],materialCosts:[]};
+  orders.push(newOrder);saveWorkOrders(orders);syncDispatchToSheet(newOrder);
+  showToast('工號 '+workId+' 派工完成！已派 '+names.length+' 人，'+methods.join('+')+' 檢測');
   clearForm();
 }
-
-function clearForm() {
-  document.getElementById('inp-workId').value = '';
-  document.getElementById('inp-projectName').value = '';
-  document.querySelectorAll('#method-checkboxes input').forEach(cb => cb.checked = false);
-  document.getElementById('inp-count').value = '3';
-  document.getElementById('inp-startDate').value = '';
-  document.getElementById('inp-endDate').value = '';
-  selectedPersonnel.clear();
-  document.getElementById('suggestion-box').classList.add('hidden');
-  renderPersonnelGrid();
+function clearForm(){
+  document.getElementById('inp-workId').value='';document.getElementById('inp-projectName').value='';
+  document.querySelectorAll('#method-checkboxes input').forEach(cb=>cb.checked=false);
+  document.getElementById('inp-count').value='3';
+  document.getElementById('inp-startDate').value='';document.getElementById('inp-endDate').value='';
+  selectedPersonnel.clear();document.getElementById('suggestion-box').classList.add('hidden');renderPersonnelGrid();
 }
 
-// ═══ RENDER WORKLOG ═══
-// ═══ DAILY RATE ═══
-function getDailyRate() {
-  const stored = localStorage.getItem('ndt_daily_rate');
-  return stored ? parseInt(stored) : 15000;
-}
-function saveDailyRate(val) {
-  const num = parseInt(String(val).replace(/[,，\s]/g, '')) || 15000;
-  localStorage.setItem('ndt_daily_rate', num);
-  document.getElementById('daily-rate').value = num.toLocaleString();
-}
-function initDailyRate() {
-  const rate = getDailyRate();
-  document.getElementById('daily-rate').value = rate.toLocaleString();
+function getDailyRate(){const s=localStorage.getItem('ndt_daily_rate');return s?parseInt(s):15000;}
+function saveDailyRate(val){const n=parseInt(String(val).replace(/[,，\s]/g,''))||15000;localStorage.setItem('ndt_daily_rate',n);document.getElementById('daily-rate').value=n.toLocaleString();}
+function initDailyRate(){document.getElementById('daily-rate').value=getDailyRate().toLocaleString();}
+function parseMoney(val){return parseInt(String(val).replace(/[,，\s$NT]/g,''))||0;}
+function fmtMoney(n){return n.toLocaleString();}
+
+// ─── 備註項目正規化 ───
+function parseLaborItem(v){
+  if(v!==null&&typeof v==='object')return{amount:Number(v.amount)||0,remark:v.remark||''};
+  return{amount:typeof v==='number'?v:parseMoney(String(v)),remark:''};
 }
 
-// ═══ COST HELPERS ═══
-function parseMoney(val) {
-  return parseInt(String(val).replace(/[,，\s$NT]/g, '')) || 0;
-}
-function fmtMoney(n) {
-  return n.toLocaleString();
-}
-
-function addLaborCost(idx) {
-  const orders = loadWorkOrders();
-  if (!orders[idx].laborCosts) orders[idx].laborCosts = [];
-  orders[idx].laborCosts.push(0);
-  saveWorkOrders(orders);
-  renderWorklog();
-}
-function removeLaborCost(idx, ci) {
-  const orders = loadWorkOrders();
-  orders[idx].laborCosts.splice(ci, 1);
-  saveWorkOrders(orders);
-  renderWorklog();
-}
-function updateLaborCost(idx, ci, val) {
-  const orders = loadWorkOrders();
-  if (!orders[idx].laborCosts) orders[idx].laborCosts = [];
-  orders[idx].laborCosts[ci] = parseMoney(val);
-  saveWorkOrders(orders);
+// ─── 單一工單自身成本 ───
+function calcOwnCost(o,today,dailyRate){
+  const s=new Date(o.startDate);s.setHours(0,0,0,0);
+  const e=new Date(o.endDate);e.setHours(0,0,0,0);
+  if(s>today)return{laborBase:0,laborExtra:0,materialTotal:0,total:0};
+  const pc=o.personnel?o.personnel.length:1;
+  const calcEnd=(o.completed||today>=e)?e:today;
+  const actualDays=Math.max(0,Math.floor((calcEnd-s)/86400000)+1);
+  let laborBase;
+  if(o.manDaysOverride&&o.manDays){
+    if(o.completed||today>=e){laborBase=o.manDays*dailyRate;}
+    else{const totalDays=Math.max(1,Math.floor((e-s)/86400000)+1);laborBase=Math.round(o.manDays*dailyRate*Math.min(1,actualDays/totalDays));}
+  }else{laborBase=actualDays*pc*dailyRate;}
+  const laborExtra=(o.laborCosts||[]).reduce((sum,v)=>sum+parseLaborItem(v).amount,0);
+  const materialTotal=(o.materialCosts||[]).reduce((sum,v)=>sum+(Number(v)||0),0);
+  return{laborBase,laborExtra,materialTotal,total:laborBase+laborExtra+materialTotal};
 }
 
-function addMaterialCost(idx) {
-  const orders = loadWorkOrders();
-  if (!orders[idx].materialCosts) orders[idx].materialCosts = [];
-  orders[idx].materialCosts.push(0);
-  saveWorkOrders(orders);
-  renderWorklog();
-}
-function removeMaterialCost(idx, ci) {
-  const orders = loadWorkOrders();
-  orders[idx].materialCosts.splice(ci, 1);
-  saveWorkOrders(orders);
-  renderWorklog();
-}
-function updateMaterialCost(idx, ci, val) {
-  const orders = loadWorkOrders();
-  if (!orders[idx].materialCosts) orders[idx].materialCosts = [];
-  orders[idx].materialCosts[ci] = parseMoney(val);
-  saveWorkOrders(orders);
+// ─── 截至當日成本（含同工號累計邏輯）───
+// 已完工 → 只顯示自身成本
+// 進行中 → 累加同工號所有已開始工單的成本
+function calcDisplayCost(currentOrder,allOrders,today,dailyRate){
+  const cs=new Date(currentOrder.startDate);cs.setHours(0,0,0,0);
+  if(cs>today)return 0;
+  if(currentOrder.completed)return calcOwnCost(currentOrder,today,dailyRate).total;
+  return allOrders.filter(o=>o.workId===currentOrder.workId).reduce((sum,o)=>{
+    const os=new Date(o.startDate);os.setHours(0,0,0,0);
+    return os<=today?sum+calcOwnCost(o,today,dailyRate).total:sum;
+  },0);
 }
 
-function updateQuote(idx, val) {
-  const orders = loadWorkOrders();
-  orders[idx].quote = parseMoney(val);
-  saveWorkOrders(orders);
+function addLaborCost(idx){const orders=loadWorkOrders();if(!orders[idx].laborCosts)orders[idx].laborCosts=[];orders[idx].laborCosts.push({amount:0,remark:''});saveWorkOrders(orders);renderWorklog();}
+function removeLaborCost(idx,ci){const orders=loadWorkOrders();orders[idx].laborCosts.splice(ci,1);saveWorkOrders(orders);renderWorklog();}
+function updateLaborCost(idx,ci,val){const orders=loadWorkOrders();if(!orders[idx].laborCosts)orders[idx].laborCosts=[];const item=parseLaborItem(orders[idx].laborCosts[ci]||{});item.amount=parseMoney(val);orders[idx].laborCosts[ci]=item;saveWorkOrders(orders);}
+function updateLaborRemark(idx,ci,val){const orders=loadWorkOrders();if(!orders[idx].laborCosts)orders[idx].laborCosts=[];const item=parseLaborItem(orders[idx].laborCosts[ci]||{});item.remark=val.trim();orders[idx].laborCosts[ci]=item;saveWorkOrders(orders);}
+function addMaterialCost(idx){const orders=loadWorkOrders();if(!orders[idx].materialCosts)orders[idx].materialCosts=[];orders[idx].materialCosts.push(0);saveWorkOrders(orders);renderWorklog();}
+function removeMaterialCost(idx,ci){const orders=loadWorkOrders();orders[idx].materialCosts.splice(ci,1);saveWorkOrders(orders);renderWorklog();}
+function updateMaterialCost(idx,ci,val){const orders=loadWorkOrders();if(!orders[idx].materialCosts)orders[idx].materialCosts=[];orders[idx].materialCosts[ci]=parseMoney(val);saveWorkOrders(orders);}
+function updateQuote(idx,val){const orders=loadWorkOrders();orders[idx].quote=parseMoney(val);saveWorkOrders(orders);}
+function updateManDays(idx,val){const orders=loadWorkOrders();orders[idx].manDays=parseInt(String(val).replace(/[^0-9]/g,''))||0;orders[idx].manDaysOverride=true;saveWorkOrders(orders);}
+
+function toggleCompletedSection(){
+  const c=document.getElementById('completed-content');const ic=document.getElementById('completed-toggle-icon');
+  if(c.style.display==='none'){c.style.display='';ic.textContent='收合 ▲';}else{c.style.display='none';ic.textContent='展開 ▼';}
 }
 
-// ═══ 完工區展開/收合 ═══
-function toggleCompletedSection() {
-  const content = document.getElementById('completed-content');
-  const icon = document.getElementById('completed-toggle-icon');
-  if (content.style.display === 'none') {
-    content.style.display = '';
-    icon.textContent = '收合 ▲';
-  } else {
-    content.style.display = 'none';
-    icon.textContent = '展開 ▼';
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+function buildOrderRow(o,i,dailyRate,now,isCompletedRow,allOrders){
+  const s=new Date(o.startDate);s.setHours(0,0,0,0);
+  const e=new Date(o.endDate);e.setHours(0,0,0,0);
+  const diffDays=Math.floor((now-e)/86400000);
+  let rowClass='',overdueTag='';
+  if(!o.completed){
+    if(diffDays>14){rowClass='warn-red';overdueTag='<span class="overdue-tag red">逾期 '+diffDays+' 天</span>';}
+    else if(diffDays>7&&!o.report){rowClass='warn-yellow';overdueTag='<span class="overdue-tag yellow">逾期 '+diffDays+' 天</span>';}
   }
-}
+  const own=calcOwnCost(o,now,dailyRate);
+  const currentCost=calcDisplayCost(o,allOrders,now,dailyRate);
+  const quote=o.quote||0;
+  let costClass='';
+  if(quote>0){const r=currentCost/quote;costClass=r>=0.9?'cost-90':r>=0.8?'cost-80':r>=0.7?'cost-70':'';}
+  const hasSameAccum=!o.completed&&allOrders.some(x=>x.workId===o.workId&&x!==o&&(()=>{const d=new Date(x.startDate);d.setHours(0,0,0,0);return d<=now;})());
 
-// ═══ 產生工單列 HTML（共用） ═══
-function buildOrderRow(o, i, dailyRate, now, isCompletedRow) {
-    const startDate = new Date(o.startDate);
-    const endDate = new Date(o.endDate);
-    startDate.setHours(0,0,0,0);
-    endDate.setHours(0,0,0,0);
-    const diffDays = Math.floor((now - endDate) / 86400000);
-    const personnelCount = o.personnel ? o.personnel.length : 1;
+  const personnelStr=Array.isArray(o.personnel)?o.personnel.map(esc).join('、'):esc(o.personnel||'');
 
-    // 逾期警示（僅未完工）
-    let rowClass = '';
-    let overdueTag = '';
-    if (!o.completed) {
-      if (diffDays > 14) {
-        rowClass = 'warn-red';
-        overdueTag = `<span class="overdue-tag red">逾期 ${diffDays} 天</span>`;
-      } else if (diffDays > 7 && !o.report) {
-        rowClass = 'warn-yellow';
-        overdueTag = `<span class="overdue-tag yellow">逾期 ${diffDays} 天</span>`;
-      }
-    }
-
-    const calcEndDate = o.completed ? endDate : now;
-    const actualDays = Math.max(0, Math.floor((calcEndDate - startDate) / 86400000) + 1);
-    const laborBase = actualDays * personnelCount * dailyRate;
-    const laborExtra = (o.laborCosts || []).reduce((s, v) => s + v, 0);
-    const materialTotal = (o.materialCosts || []).reduce((s, v) => s + v, 0);
-    const currentCost = laborBase + laborExtra + materialTotal;
-
-    const quote = o.quote || 0;
-    let costClass = '';
-    if (quote > 0) {
-      const ratio = currentCost / quote;
-      if (ratio >= 0.9) costClass = 'cost-90';
-      else if (ratio >= 0.8) costClass = 'cost-80';
-      else if (ratio >= 0.7) costClass = 'cost-70';
-    }
-
-    // 完工區：精簡顯示（無人力/物料明細編輯）
-    if (isCompletedRow) {
-      return `
-      <tr style="opacity:0.75;">
-        <td style="font-weight:700; color:var(--accent)">${o.workId}</td>
-        <td>${o.projectName}</td>
-        <td><span class="badge badge-2">${o.method}</span></td>
-        <td style="font-size:12px;">${Array.isArray(o.personnel) ? o.personnel.join('、') : (o.personnel || '')}</td>
-        <td>${o.startDate}</td>
-        <td>${o.endDate}</td>
-        <td style="text-align:center; font-weight:700">${o.manDays}</td>
-        <td style="text-align:right;">${quote ? fmtMoney(quote) : ''}</td>
-        <td style="text-align:right;"><span class="cost-value">${fmtMoney(currentCost)}</span></td>
-        <td style="text-align:right;"><span class="cost-value" style="color:var(--accent2);">${fmtMoney(Math.ceil(currentCost / 0.85))}</span></td>
-        <td class="check-cell"><input type="checkbox" ${o.processControl ? 'checked' : ''} disabled></td>
-        <td class="check-cell"><input type="checkbox" ${o.report ? 'checked' : ''} disabled></td>
-        <td class="check-cell">
-          <input type="checkbox" checked
-                 onchange="updateOrderField(${i},'completed',this.checked); renderWorklog();">
-        </td>
-        <td style="font-size:12px; color:var(--text-dim);">${o.maintainer || ''}</td>
-        <td>${isAdmin
-          ? `<button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>`
-          : `<span style="color:var(--text-muted); font-size:12px;">—</span>`}</td>
-      </tr>`;
-    }
-
-    // 進行中：完整編輯功能
-    const laborItems = (o.laborCosts || []).map((v, ci) => `
-      <div class="cost-item">
-        <input class="cost-input" value="${v ? fmtMoney(v) : ''}" placeholder="金額"
-               onblur="updateLaborCost(${i},${ci},this.value); renderWorklog();">
-        <button class="cost-remove" onclick="removeLaborCost(${i},${ci})">✕</button>
-      </div>
-    `).join('');
-
-    const materialItems = (o.materialCosts || []).map((v, ci) => `
-      <div class="cost-item">
-        <input class="cost-input" value="${v ? fmtMoney(v) : ''}" placeholder="金額"
-               onblur="updateMaterialCost(${i},${ci},this.value); renderWorklog();">
-        <button class="cost-remove" onclick="removeMaterialCost(${i},${ci})">✕</button>
-      </div>
-    `).join('');
-
-    return `
-    <tr class="${rowClass}">
-      <td style="font-weight:700; color:var(--accent)">${o.workId}${overdueTag}</td>
-      <td>${o.projectName}</td>
-      <td><span class="badge badge-2">${o.method}</span></td>
-      <td style="font-size:12px;">${Array.isArray(o.personnel) ? o.personnel.join('、') : (o.personnel || '')}</td>
-      <td>${isAdmin
-        ? `<input type="date" class="date-input-inline" value="${o.startDate}"
-               onchange="updateOrderDate(${i},'startDate',this.value)">`
-        : o.startDate}</td>
-      <td>${isAdmin
-        ? `<input type="date" class="date-input-inline" value="${o.endDate}"
-               onchange="updateOrderDate(${i},'endDate',this.value)">`
-        : o.endDate}</td>
-      <td style="text-align:center; font-weight:700">${o.manDays}</td>
-      <td>
-        <input class="cost-input" value="${quote ? fmtMoney(quote) : ''}" placeholder="輸入報價"
-               onblur="updateQuote(${i},this.value); renderWorklog();">
-      </td>
-      <td style="min-width:120px;">
-        <div style="font-size:11px; color:var(--text-dim); margin-bottom:2px;">
-          基本：${fmtMoney(laborBase)}
-        </div>
-        ${laborItems}
-        <button class="cost-add-btn" onclick="addLaborCost(${i})">＋ 新增人力</button>
-      </td>
-      <td style="min-width:120px;">
-        ${materialItems}
-        <button class="cost-add-btn" onclick="addMaterialCost(${i})">＋ 新增物料</button>
-      </td>
-      <td style="text-align:right;">
-        <span class="cost-value ${costClass}">${fmtMoney(currentCost)}</span>
-        ${quote > 0 ? `<div style="font-size:10px; color:var(--text-muted);">${Math.round(currentCost/quote*100)}% of 報價</div>` : ''}
-      </td>
-      <td style="text-align:right;">
-        <span class="cost-value" style="color:var(--accent2);">${fmtMoney(Math.ceil(currentCost / 0.85))}</span>
-      </td>
-      <td class="check-cell">
-        <input type="checkbox" ${o.processControl ? 'checked' : ''}
-               onchange="updateOrderField(${i},'processControl',this.checked)">
-      </td>
-      <td class="check-cell">
-        <input type="checkbox" ${o.report ? 'checked' : ''}
-               onchange="updateOrderField(${i},'report',this.checked)">
-      </td>
-      <td class="check-cell">
-        <input type="checkbox" ${o.completed ? 'checked' : ''}
-               onchange="updateOrderField(${i},'completed',this.checked); renderWorklog();">
-      </td>
-      <td style="font-size:12px; color:var(--text-dim);">${o.maintainer || ''}</td>
-      <td>${isAdmin
-        ? `<button class="btn btn-danger btn-sm" onclick="deleteOrder(${i})">刪除</button>`
-        : `<span style="color:var(--text-muted); font-size:12px;">—</span>`}</td>
-    </tr>`;
-}
-
-// ═══ RENDER WORKLOG ═══
-function renderWorklog() {
-  const orders = loadWorkOrders();
-  const tbody = document.getElementById('worklog-body');
-  const empty = document.getElementById('worklog-empty');
-  const completedSection = document.getElementById('completed-section');
-  const completedBody = document.getElementById('completed-body');
-  const completedCount = document.getElementById('completed-count');
-
-  // 分離進行中 vs 已完工
-  const activeOrders = [];
-  const completedOrders = [];
-  orders.forEach((o, i) => {
-    if (o.completed) {
-      completedOrders.push({ order: o, index: i });
-    } else {
-      activeOrders.push({ order: o, index: i });
-    }
-  });
-
-  const now = new Date();
-  now.setHours(0,0,0,0);
-  const dailyRate = getDailyRate();
-
-  // 渲染進行中工單
-  if (activeOrders.length === 0 && completedOrders.length === 0) {
-    tbody.innerHTML = '';
-    empty.classList.remove('hidden');
-    completedSection.classList.add('hidden');
-    return;
+  if(isCompletedRow){
+    return '<tr class="completed-row" data-workid="'+esc(o.workId)+'" style="opacity:0.8;">'
+      +'<td style="font-weight:700;color:var(--accent);padding-left:28px;">'+esc(o.workId)+'</td>'
+      +'<td>'+esc(o.projectName)+'</td>'
+      +'<td><span class="badge badge-2">'+esc(o.method)+'</span></td>'
+      +'<td style="font-size:12px;">'+personnelStr+'</td>'
+      +'<td>'+esc(o.startDate)+'</td>'
+      +'<td>'+esc(o.endDate)+'</td>'
+      +'<td style="text-align:center;font-weight:700;">'+o.manDays+(o.manDaysOverride?' <span title="手動設定" style="color:var(--warn);font-size:10px;">✎</span>':'')+'</td>'
+      +'<td style="text-align:right;">'+(quote?fmtMoney(quote):'')+'</td>'
+      +'<td style="text-align:right;"><span class="cost-value">'+fmtMoney(own.total)+'</span></td>'
+      +'<td style="text-align:right;"><span class="cost-value" style="color:var(--accent2);">'+fmtMoney(Math.ceil(own.total/0.85))+'</span></td>'
+      +'<td class="check-cell"><input type="checkbox" '+(o.processControl?'checked ':'')+' disabled/></td>'
+      +'<td class="check-cell"><input type="checkbox" '+(o.report?'checked ':'')+' disabled/></td>'
+      +'<td class="check-cell"><input type="checkbox" checked onchange="updateOrderField('+i+',\'completed\',this.checked);renderWorklog();"/></td>'
+      +'<td style="font-size:12px;color:var(--text-dim);">'+esc(o.maintainer||'')+'</td>'
+      +'<td>'+(isAdmin?'<button class="btn btn-danger btn-sm" onclick="deleteOrder('+i+')">刪除</button>':'<span style="color:var(--text-muted);font-size:12px;">—</span>')+'</td>'
+      +'</tr>';
   }
 
-  if (activeOrders.length === 0) {
-    tbody.innerHTML = '';
-    empty.classList.remove('hidden');
-  } else {
-    empty.classList.add('hidden');
-    tbody.innerHTML = activeOrders.map(item =>
-      buildOrderRow(item.order, item.index, dailyRate, now, false)
-    ).join('');
-  }
+  const laborItems=(o.laborCosts||[]).map((v,ci)=>{
+    const item=parseLaborItem(v);
+    return '<div class="cost-item">'
+      +'<input class="cost-input" value="'+(item.amount?fmtMoney(item.amount):'')+'" placeholder="金額" onblur="updateLaborCost('+i+','+ci+',this.value);renderWorklog();">'
+      +'<input class="cost-remark-input" value="'+esc(item.remark)+'" placeholder="備註說明" onblur="updateLaborRemark('+i+','+ci+',this.value);">'
+      +'<button class="cost-remove" onclick="removeLaborCost('+i+','+ci+')">✕</button>'
+      +'</div>';
+  }).join('');
 
-  // 渲染已完工區
-  if (completedOrders.length > 0) {
+  const materialItems=(o.materialCosts||[]).map((v,ci)=>'<div class="cost-item"><input class="cost-input" value="'+(v?fmtMoney(v):'')+'" placeholder="金額" onblur="updateMaterialCost('+i+','+ci+',this.value);renderWorklog();"><button class="cost-remove" onclick="removeMaterialCost('+i+','+ci+')">✕</button></div>').join('');
+
+  const costNote=hasSameAccum?'<div style="font-size:10px;color:var(--accent2);margin-top:2px;">含同工號累計</div>':'';
+
+  return '<tr class="'+rowClass+'">'
+    +'<td style="font-weight:700;color:var(--accent);">'+esc(o.workId)+overdueTag+'</td>'
+    +'<td>'+esc(o.projectName)+'</td>'
+    +'<td><span class="badge badge-2">'+esc(o.method)+'</span></td>'
+    +'<td style="font-size:12px;">'+personnelStr+'</td>'
+    +'<td><input type="date" class="date-input-inline" value="'+o.startDate+'" onchange="updateOrderDate('+i+',\'startDate\',this.value)"></td>'
+    +'<td><input type="date" class="date-input-inline" value="'+o.endDate+'" onchange="updateOrderDate('+i+',\'endDate\',this.value)"></td>'
+    +'<td style="text-align:center;"><input class="mandays-input '+(o.manDaysOverride?'mandays-override':'')+'" value="'+o.manDays+'" title="'+(o.manDaysOverride?'手動設定（橘框）':'自動計算，可手動覆寫')+'" onblur="updateManDays('+i+',this.value);" onkeydown="if(event.key===\'Enter\')this.blur();"></td>'
+    +'<td><input class="cost-input" value="'+(quote?fmtMoney(quote):'')+'" placeholder="輸入報價" onblur="updateQuote('+i+',this.value);renderWorklog();"></td>'
+    +'<td style="min-width:160px;"><div style="font-size:11px;color:var(--text-dim);margin-bottom:2px;">基本：'+fmtMoney(own.laborBase)+'</div>'+laborItems+'<button class="cost-add-btn" onclick="addLaborCost('+i+')">＋ 新增人力</button></td>'
+    +'<td style="min-width:120px;">'+materialItems+'<button class="cost-add-btn" onclick="addMaterialCost('+i+')">＋ 新增物料</button></td>'
+    +'<td style="text-align:right;"><span class="cost-value '+costClass+'">'+fmtMoney(currentCost)+'</span>'+(quote>0?'<div style="font-size:10px;color:var(--text-muted);">'+Math.round(currentCost/quote*100)+'% of 報價</div>':'')+costNote+'</td>'
+    +'<td style="text-align:right;"><span class="cost-value" style="color:var(--accent2);">'+fmtMoney(Math.ceil(currentCost/0.85))+'</span></td>'
+    +'<td class="check-cell"><input type="checkbox" '+(o.processControl?'checked ':'')+' onchange="updateOrderField('+i+',\'processControl\',this.checked)"/></td>'
+    +'<td class="check-cell"><input type="checkbox" '+(o.report?'checked ':'')+' onchange="updateOrderField('+i+',\'report\',this.checked)"/></td>'
+    +'<td class="check-cell"><input type="checkbox" '+(o.completed?'checked ':'')+' onchange="updateOrderField('+i+',\'completed\',this.checked);renderWorklog();"/></td>'
+    +'<td style="font-size:12px;color:var(--text-dim);">'+esc(o.maintainer||'')+'</td>'
+    +'<td>'+(isAdmin?'<button class="btn btn-danger btn-sm" onclick="deleteOrder('+i+')">刪除</button>':'<span style="color:var(--text-muted);font-size:12px;">—</span>')+'</td>'
+    +'</tr>';
+}
+
+function renderWorklog(){
+  const orders=loadWorkOrders();
+  const tbody=document.getElementById('worklog-body');
+  const empty=document.getElementById('worklog-empty');
+  const completedSection=document.getElementById('completed-section');
+  const completedBody=document.getElementById('completed-body');
+  const completedCount=document.getElementById('completed-count');
+  const active=[],completed=[];
+  orders.forEach((o,i)=>{(o.completed?completed:active).push({order:o,index:i});});
+  const now=new Date();now.setHours(0,0,0,0);
+  const dailyRate=getDailyRate();
+
+  if(!active.length&&!completed.length){tbody.innerHTML='';empty.classList.remove('hidden');completedSection.classList.add('hidden');return;}
+  if(!active.length){tbody.innerHTML='';empty.classList.remove('hidden');}
+  else{empty.classList.add('hidden');tbody.innerHTML=active.map(item=>buildOrderRow(item.order,item.index,dailyRate,now,false,orders)).join('');}
+
+  if(completed.length){
     completedSection.classList.remove('hidden');
-    completedCount.textContent = `(${completedOrders.length} 筆)`;
-    completedBody.innerHTML = completedOrders.map(item =>
-      buildOrderRow(item.order, item.index, dailyRate, now, true)
-    ).join('');
-  } else {
-    completedSection.classList.add('hidden');
-  }
-}
-
-function updateOrderDate(index, field, value) {
-  const orders = loadWorkOrders();
-  orders[index][field] = value;
-  // 重新計算人日數
-  const o = orders[index];
-  const start = new Date(o.startDate);
-  const end = new Date(o.endDate);
-  const days = Math.max(1, Math.ceil((end - start) / 86400000) + 1);
-  o.manDays = days * (o.personnel ? o.personnel.length : 1);
-  saveWorkOrders(orders);
-  renderWorklog();
-  showToast('日期已更新');
-}
-
-function updateOrderField(index, field, value) {
-  const orders = loadWorkOrders();
-  orders[index][field] = value;
-  saveWorkOrders(orders);
-}
-
-function deleteOrder(index) {
-  if (!confirm('確定要刪除此工單？')) return;
-  const orders = loadWorkOrders();
-  orders.splice(index, 1);
-  saveWorkOrders(orders);
-  renderWorklog();
-  showToast('工單已刪除');
-}
-
-// ═══ RENDER STATS ═══
-function renderStats() {
-  const orders = loadWorkOrders();
-  const yearSelect = document.getElementById('stats-year');
-  
-  // Collect all years
-  const years = [...new Set(orders.map(o => o.year || new Date(o.startDate).getFullYear()))].sort().reverse();
-  const currentYear = new Date().getFullYear();
-  if (!years.includes(currentYear)) years.unshift(currentYear);
-
-  const selectedYear = parseInt(yearSelect.value) || currentYear;
-  yearSelect.innerHTML = years.map(y => `<option value="${y}" ${y===selectedYear?'selected':''}>${y}</option>`).join('');
-
-  // Filter by year
-  const filtered = orders.filter(o => (o.year || new Date(o.startDate).getFullYear()) === selectedYear);
-
-  // Count per person per method
-  const counts = {}; // name -> {PT:0, MT:0, ...}
-  personnelData.forEach(p => {
-    counts[p.name] = {};
-    METHODS.forEach(m => counts[p.name][m] = 0);
-  });
-
-  filtered.forEach(o => {
-    // 支援多方法：methods 陣列或舊格式 method 字串
-    const orderMethods = o.methods || (o.method ? o.method.split('+') : []);
-    (o.personnel || []).forEach(name => {
-      if (counts[name]) {
-        orderMethods.forEach(m => {
-          if (counts[name][m] !== undefined) counts[name][m]++;
-        });
+    completedCount.textContent='('+completed.length+' 筆)';
+    // 依工號分組
+    const widOrder=[],byWid={};
+    completed.forEach(item=>{const wid=item.order.workId;if(!byWid[wid]){byWid[wid]=[];widOrder.push(wid);}byWid[wid].push(item);});
+    let html='';
+    widOrder.forEach(wid=>{
+      const items=byWid[wid];
+      const mSet=new Set(),pSet=new Set();let totalMD=0,totalCost=0;
+      items.forEach(item=>{
+        const o=item.order;
+        (o.methods||(o.method?o.method.split('+'):[])).forEach(m=>mSet.add(m));
+        (Array.isArray(o.personnel)?o.personnel:[o.personnel||'']).forEach(p=>p&&pSet.add(p));
+        totalMD+=o.manDays||0;totalCost+=calcOwnCost(o,now,dailyRate).total;
+      });
+      if(items.length>1){
+        html+='<tr class="workid-summary">'
+          +'<td style="color:var(--accent2);">📊 '+esc(wid)+'</td>'
+          +'<td style="font-size:12px;color:var(--text-dim);">所有方法</td>'
+          +'<td style="font-size:12px;color:var(--text-dim);">'+esc([...mSet].join('+'))+'</td>'
+          +'<td style="font-size:12px;">'+esc([...pSet].join('、'))+'</td>'
+          +'<td colspan="2" style="color:var(--text-muted);text-align:center;">—</td>'
+          +'<td style="text-align:center;">'+totalMD+'</td>'
+          +'<td style="color:var(--text-muted);">—</td>'
+          +'<td style="text-align:right;"><span class="cost-value">'+fmtMoney(totalCost)+'</span></td>'
+          +'<td style="text-align:right;color:var(--accent2);font-weight:900;">'+fmtMoney(Math.ceil(totalCost/0.85))+'</td>'
+          +'<td colspan="5" style="color:var(--text-muted);font-size:12px;">合計 '+items.length+' 次派工</td>'
+          +'</tr>';
       }
+      items.forEach(item=>html+=buildOrderRow(item.order,item.index,dailyRate,now,true,orders));
     });
-  });
-
-  // Summary stats
-  const totalOrders = filtered.length;
-  const totalManDays = filtered.reduce((s, o) => s + (o.manDays || 0), 0);
-  const completedOrders = filtered.filter(o => o.completed).length;
-
-  document.getElementById('stats-summary').innerHTML = `
-    <div class="stat-card"><div class="value">${totalOrders}</div><div class="label">工單數</div></div>
-    <div class="stat-card"><div class="value">${totalManDays}</div><div class="label">總人日數</div></div>
-    <div class="stat-card"><div class="value">${completedOrders}</div><div class="label">已完工</div></div>
-    <div class="stat-card"><div class="value">${totalOrders - completedOrders}</div><div class="label">進行中</div></div>
-  `;
-
-  // Table
-  const tbody = document.getElementById('stats-body');
-  tbody.innerHTML = personnelData.map(p => {
-    const c = counts[p.name];
-    const total = METHODS.reduce((s, m) => s + c[m], 0);
-    if (total === 0) return '';
-    return `<tr>
-      <td>${p.id}</td>
-      <td style="font-weight:600">${p.name}</td>
-      ${METHODS.map(m => `<td style="text-align:center;${c[m]>0?'font-weight:700;color:var(--accent)':''}">${c[m] || '—'}</td>`).join('')}
-      <td style="text-align:center;font-weight:900;color:var(--accent2)">${total}</td>
-    </tr>`;
-  }).filter(Boolean).join('');
-
-  if (!tbody.innerHTML) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px;">
-      ${selectedYear} 年度尚無派工紀錄
-    </td></tr>`;
-  }
+    completedBody.innerHTML=html;
+  }else completedSection.classList.add('hidden');
 }
 
-// ═══ TOAST ═══
-function showToast(msg, type = 'success') {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  if (type === 'warn') toast.style.background = 'var(--warn)';
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+function updateOrderDate(index,field,value){
+  const orders=loadWorkOrders();orders[index][field]=value;
+  const o=orders[index];
+  if(!o.manDaysOverride){const s=new Date(o.startDate);const e=new Date(o.endDate);o.manDays=Math.max(1,Math.ceil((e-s)/86400000)+1)*(o.personnel?o.personnel.length:1);}
+  saveWorkOrders(orders);renderWorklog();showToast('日期已更新');
+}
+function updateOrderField(index,field,value){const orders=loadWorkOrders();orders[index][field]=value;saveWorkOrders(orders);}
+function deleteOrder(index){if(!confirm('確定要刪除此工單？'))return;const orders=loadWorkOrders();orders.splice(index,1);saveWorkOrders(orders);renderWorklog();showToast('工單已刪除');}
+
+function renderStats(){
+  const orders=loadWorkOrders();const yearSelect=document.getElementById('stats-year');
+  const years=[...new Set(orders.map(o=>o.year||new Date(o.startDate).getFullYear()))].sort().reverse();
+  const currentYear=new Date().getFullYear();if(!years.includes(currentYear))years.unshift(currentYear);
+  const selectedYear=parseInt(yearSelect.value)||currentYear;
+  yearSelect.innerHTML=years.map(y=>'<option value="'+y+'" '+(y===selectedYear?'selected':'')+'>'+y+'</option>').join('');
+  const filtered=orders.filter(o=>(o.year||new Date(o.startDate).getFullYear())===selectedYear);
+  const counts={};personnelData.forEach(p=>{counts[p.name]={};METHODS.forEach(m=>counts[p.name][m]=0);});
+  filtered.forEach(o=>{const om=o.methods||(o.method?o.method.split('+'):[]);(o.personnel||[]).forEach(name=>{if(counts[name])om.forEach(m=>{if(counts[name][m]!==undefined)counts[name][m]++;});});});
+  const tot=filtered.length,totMD=filtered.reduce((s,o)=>s+(o.manDays||0),0),totC=filtered.filter(o=>o.completed).length;
+  document.getElementById('stats-summary').innerHTML='<div class="stat-card"><div class="value">'+tot+'</div><div class="label">工單數</div></div><div class="stat-card"><div class="value">'+totMD+'</div><div class="label">總人日數</div></div><div class="stat-card"><div class="value">'+totC+'</div><div class="label">已完工</div></div><div class="stat-card"><div class="value">'+(tot-totC)+'</div><div class="label">進行中</div></div>';
+  const tbody=document.getElementById('stats-body');
+  tbody.innerHTML=personnelData.map(p=>{const c=counts[p.name];const total=METHODS.reduce((s,m)=>s+c[m],0);if(!total)return'';return'<tr><td>'+p.id+'</td><td style="font-weight:600">'+p.name+'</td>'+METHODS.map(m=>'<td style="text-align:center;'+(c[m]>0?'font-weight:700;color:var(--accent)':'')+'">'+( c[m]||'—')+'</td>').join('')+'<td style="text-align:center;font-weight:900;color:var(--accent2)">'+total+'</td></tr>';}).filter(Boolean).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:40px;">'+selectedYear+' 年度尚無派工紀錄</td></tr>';
 }
 
-// ═══ INIT ═══
-async function init() {
-  // Set default dates
-  const today = new Date();
-  document.getElementById('inp-startDate').value = today.toISOString().slice(0, 10);
-  const nextWeek = new Date(today.getTime() + 7 * 86400000);
-  document.getElementById('inp-endDate').value = nextWeek.toISOString().slice(0, 10);
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className='toast';if(type==='warn')t.style.background='var(--warn)';t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),3000);}
 
-  checkAdminSession();
-  updateAdminUI();
-  initDailyRate();
-  renderPersonnelGrid();
-  renderCertTable();
-
-  // ═══ Guest 權限控制 ═══
+async function init(){
+  const today=new Date();
+  document.getElementById('inp-startDate').value=today.toISOString().slice(0,10);
+  document.getElementById('inp-endDate').value=new Date(today.getTime()+7*86400000).toISOString().slice(0,10);
+  checkAdminSession();updateAdminUI();initDailyRate();renderPersonnelGrid();renderCertTable();
   applyGuestPermissions();
-
-  // 啟動時自動從 Google Sheets 同步
-  if (getGasUrl()) {
-    await loadFromSheet();
-  }
+  if(getGasUrl())await loadFromSheet();
 }
-
-function applyGuestPermissions() {
-  if (!isGuest()) return;
-
-  // 隱藏「派工作業」頁籤
-  const navTabs = document.querySelectorAll('.nav-tab');
-  if (navTabs[0]) navTabs[0].style.display = 'none'; // 派工作業 tab
-
-  // 如果當前在派工頁面，跳轉到工號管理
-  if (!document.getElementById('page-dispatch').classList.contains('hidden')) {
-    showPage('worklog');
-  }
-
-  // 工號管理頁面設為唯讀：隱藏所有 input/button 的編輯功能
+function applyGuestPermissions(){
+  if(!isGuest())return;
+  const tabs=document.querySelectorAll('.nav-tab');if(tabs[0])tabs[0].style.display='none';
+  if(!document.getElementById('page-dispatch').classList.contains('hidden'))showPage('worklog');
   document.body.classList.add('role-guest');
 }
-
-// Guest CSS rules
-(function() {
-  const style = document.createElement('style');
-  style.textContent = `
-    body.role-guest #page-dispatch { display: none !important; }
-    body.role-guest .cost-input { pointer-events: none; opacity: 0.6; }
-    body.role-guest .cost-add-btn { display: none !important; }
-    body.role-guest .cost-remove { display: none !important; }
-    body.role-guest .date-input-inline { pointer-events: none; }
-    body.role-guest .check-cell input { pointer-events: none; }
-    body.role-guest .btn-danger { display: none !important; }
-    body.role-guest .daily-rate-bar .cost-input { pointer-events: none; }
-    body.role-guest #admin-login-btn { display: none !important; }
-  `;
+(function(){
+  const style=document.createElement('style');
+  style.textContent='body.role-guest #page-dispatch{display:none!important}body.role-guest .cost-input{pointer-events:none;opacity:0.6}body.role-guest .cost-remark-input{pointer-events:none;opacity:0.6}body.role-guest .cost-add-btn{display:none!important}body.role-guest .cost-remove{display:none!important}body.role-guest .date-input-inline{pointer-events:none}body.role-guest .mandays-input{pointer-events:none;opacity:0.6}body.role-guest .check-cell input{pointer-events:none}body.role-guest .btn-danger{display:none!important}body.role-guest .daily-rate-bar .cost-input{pointer-events:none}body.role-guest #admin-login-btn{display:none!important}';
   document.head.appendChild(style);
 })();
-
 init();
 </script>
 </body>
-  <!-- 
-================================
-返回 NDT 主頁按鈕
-================================
-用途：在你的各應用（assignwork, schedule, housing, hr）中使用
-
-複製此段代碼到你的應用頁面
--->
-
-<!-- ======================== 方案1：頂部導航欄（推薦） ======================== -->
-
-<style>
-    .ndt-topbar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 12px 20px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        color: white;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
-    }
-
-    .ndt-back-btn {
-        background: rgba(255,255,255,0.2);
-        color: white;
-        border: 1px solid rgba(255,255,255,0.3);
-        padding: 8px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9em;
-        font-weight: 600;
-        transition: all 0.2s;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .ndt-back-btn:hover {
-        background: rgba(255,255,255,0.3);
-        border-color: rgba(255,255,255,0.5);
-        transform: translateY(-1px);
-    }
-
-    .ndt-breadcrumb {
-        font-size: 0.9em;
-        opacity: 0.9;
-        flex: 1;
-    }
-
-    .ndt-breadcrumb strong {
-        font-weight: 600;
-    }
-</style>
-
-<!-- HTML 部分 -->
-<div class="ndt-topbar">
-    <button class="ndt-back-btn" onclick="ndtGoHome()">← 返回主頁</button>
-    <span class="ndt-breadcrumb">
-        NDT 工作管理系統 / <strong id="ndt-app-name">應用</strong>
-    </span>
-</div>
-
-<script>
-    // 返回主頁函數
-    function ndtGoHome() {
-        if (window.parent !== window) {
-            // 在 iframe 中運行
-            window.parent.postMessage({ action: 'switchApp', appId: 'home' }, '*');
-        } else {
-            // 獨立運行
-            window.location.href = '/';
-        }
-    }
-
-    // 自動設置應用名稱
-    function setAppName() {
-        const name = document.getElementById('ndt-app-name');
-        if (name) {
-            // 從 URL 提取應用名稱
-            const path = window.location.pathname;
-            const appNames = {
-                'assignwork': '工作分配',
-                'outage-schedule': '停機排程',
-                'taipower-housing-calc': '住宿預估',
-                'hr-summary': '人資摘要'
-            };
-            
-            for (let [key, value] of Object.entries(appNames)) {
-                if (path.includes(key)) {
-                    name.textContent = value;
-                    break;
-                }
-            }
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', setAppName);
-</script>
-
-<!-- ======================== 方案2：懸浮返回按鈕 ======================== -->
-
-<style>
-    .ndt-floating-home {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 56px;
-        height: 56px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 28px;
-        cursor: pointer;
-        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-        transition: all 0.3s;
-        border: none;
-        z-index: 99;
-    }
-
-    .ndt-floating-home:hover {
-        transform: scale(1.1) translateY(-3px);
-        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-    }
-
-    .ndt-floating-home:active {
-        transform: scale(0.95);
-    }
-
-    @media (max-width: 768px) {
-        .ndt-floating-home {
-            width: 48px;
-            height: 48px;
-            font-size: 24px;
-            bottom: 20px;
-            right: 20px;
-        }
-    }
-</style>
-
-<!-- HTML 部分 -->
-<button class="ndt-floating-home" onclick="ndtGoHome()" title="返回主頁">🏠</button>
-
-<!-- ======================== 方案3：頁腳返回連結 ======================== -->
-
-<style>
-    .ndt-footer-link {
-        padding: 20px;
-        text-align: center;
-        border-top: 1px solid #e5e7eb;
-        background: #f9fafb;
-        margin-top: auto;
-    }
-
-    .ndt-footer-link a {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.9em;
-        transition: color 0.2s;
-    }
-
-    .ndt-footer-link a:hover {
-        color: #764ba2;
-    }
-</style>
-
-<!-- HTML 部分 -->
-<div class="ndt-footer-link">
-    <a href="#" onclick="ndtGoHome(); return false;">← 返回 NDT 管理系統主頁</a>
-</div>
-
-<!-- ======================== 完整集成範例 ======================== -->
-
-<!-- 
-在你的應用中集成，有兩種方式：
-
-方式1：只需複製上面的代碼到你的 HTML
-- CSS 自動加載
-- JavaScript 自動執行
-- 無需額外配置
-
-方式2：提取為單獨文件
-
-在你的 HTML 中引入：
-<link rel="stylesheet" href="ndt-topbar.css">
-<script src="ndt-topbar.js"></script>
-
-然後在 <body> 開頭放置：
-<div id="ndt-topbar-container"></div>
-
-示例完整 HTML：
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>我的應用</title>
-    <style>
-        body { margin: 0; padding: 0; }
-        .ndt-topbar { ... }
-        .ndt-back-btn { ... }
-        /* 你的應用樣式 */
-    </style>
-</head>
-<body>
-    <!-- 返回主頁導航 -->
-    <div class="ndt-topbar">
-        <button class="ndt-back-btn" onclick="ndtGoHome()">← 返回主頁</button>
-        <span class="ndt-breadcrumb">
-            NDT 工作管理系統 / <strong id="ndt-app-name">應用</strong>
-        </span>
-    </div>
-
-    <!-- 你的應用內容 -->
-    <div class="app-content">
-        <!-- ... -->
-    </div>
-
-    <!-- 懸浮按鈕（可選） -->
-    <button class="ndt-floating-home" onclick="ndtGoHome()" title="返回主頁">🏠</button>
-
-    <script>
-        function ndtGoHome() {
-            if (window.parent !== window) {
-                window.parent.postMessage({ action: 'switchApp', appId: 'home' }, '*');
-            } else {
-                window.location.href = '/';
-            }
-        }
-
-        function setAppName() {
-            const name = document.getElementById('ndt-app-name');
-            if (name) {
-                const path = window.location.pathname;
-                const appNames = {
-                    'assignwork': '工作分配',
-                    'outage-schedule': '停機排程',
-                    'taipower-housing-calc': '住宿預估',
-                    'hr-summary': '人資摘要'
-                };
-                
-                for (let [key, value] of Object.entries(appNames)) {
-                    if (path.includes(key)) {
-                        name.textContent = value;
-                        break;
-                    }
-                }
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', setAppName);
-    </script>
-</body>
-</html>
-
--->
-
-<!-- ======================== 使用建議 ======================== -->
-
-<!-- 
-推薦搭配方案：
-
-1. 首頁導航欄（方案1）
-   ✅ 清晰提示用戶位置
-   ✅ 一致的導航體驗
-   ✅ 適合 iframe 環境
-
-2. 懸浮按鈕（方案2）
-   ✅ 始終可見
-   ✅ 不佔用頁面空間
-   ✅ 適合獨立應用
-
-3. 頁腳連結（方案3）
-   ✅ 簡潔、不侵入性
-   ✅ 適合底部導航
-   ✅ 適合傳統應用
-
-組合使用：
-- 頂部導航 + 懸浮按鈕（最推薦）
-- 頂部導航 + 頁腳連結
-- 只用懸浮按鈕（最簡單）
-
--->
-
-<!-- ======================== 測試 ======================== -->
-
-<!--
-
-測試清單：
-
-[ ] 複製代碼到應用 HTML
-[ ] 點擊返回按鈕
-[ ] 確認返回主頁（iframe 環境）
-[ ] 在主頁點擊應用卡片重新進入
-[ ] 測試應用名稱是否正確顯示
-[ ] 手機版點擊懸浮按鈕測試
-[ ] 點擊鏈接後歷史記錄正確
-
-如遇問題：
-1. 開啟瀏覽器控制台 (F12)
-2. 查看 Console 是否有錯誤
-3. 確認 ndtGoHome() 函數已定義
-4. 確認在 iframe 或獨立環境正確運行
-
--->
-
 </html>
