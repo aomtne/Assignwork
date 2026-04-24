@@ -72,6 +72,8 @@
   .cost-remark-input:focus{outline:none;border-bottom-color:var(--accent);color:var(--text);}
   .cost-remark-input::placeholder{color:var(--text-muted);font-style:italic;}
   /* 同工號主列 */
+  tr.cost-low td{background:rgba(220,38,38,0.11)!important;}
+  tr.cost-low:hover td{background:rgba(220,38,38,0.18)!important;}
   tr.workid-summary td{background:rgba(6,182,212,0.09)!important;font-weight:700;border-top:2px solid rgba(6,182,212,0.4);border-bottom:1px solid rgba(6,182,212,0.2);}
   tr.workid-summary:hover td{background:rgba(6,182,212,0.15)!important;}
   /* 人日數輸入框 */
@@ -382,7 +384,7 @@ async function loadFromSheet(){
   }catch(err){console.warn(err);showToast('⚠ 無法連線 Sheets，使用本地快取','warn');}
   return null;
 }
-function getGasUrl(){return localStorage.getItem('ndt_gas_url')||'';}
+function getGasUrl(){return localStorage.getItem('ndt_gas_url')||'https://script.google.com/macros/s/AKfycbyHiEgKQvkPEA0fF0vs2aeg8P9W1rogruFAGhMNx2mKJR69KCSIGqma_CiL1Q67z1xd/exec';}
 function saveGasUrl(url){localStorage.setItem('ndt_gas_url',url.trim());}
 function showSyncSettings(){document.getElementById('sync-url-input').value=getGasUrl();document.getElementById('sync-modal').classList.remove('hidden');}
 async function saveSyncSettings(){
@@ -583,6 +585,7 @@ function buildOrderRow(o,i,dailyRate,now,isCompletedRow,allOrders){
   const quote=o.quote||0;
   let costClass='';
   if(quote>0){const r=currentCost/quote;costClass=r>=0.9?'cost-90':r>=0.8?'cost-80':r>=0.7?'cost-70':'';}
+  if(!o.completed&&currentCost<200000){rowClass=(rowClass?rowClass+' ':'')+'cost-low';}
   const hasSameAccum=!o.completed&&allOrders.some(x=>x.workId===o.workId&&x!==o&&(()=>{const d=new Date(x.startDate);d.setHours(0,0,0,0);return d<=now;})());
 
   const personnelStr=Array.isArray(o.personnel)?o.personnel.map(esc).join('、'):esc(o.personnel||'');
@@ -674,20 +677,26 @@ function renderWorklog(){
         totalMD+=o.manDays||0;totalCost+=calcOwnCost(o,now,dailyRate).total;
       });
       if(items.length>1){
-        html+='<tr class="workid-summary">'
+        html+='<tr class="workid-summary'+(totalCost<200000?' cost-low':'')+'">'
           +'<td style="color:var(--accent2);">📊 '+esc(wid)+'</td>'
           +'<td style="font-size:12px;color:var(--text-dim);">所有方法</td>'
           +'<td style="font-size:12px;color:var(--text-dim);">'+esc([...mSet].join('+'))+'</td>'
           +'<td style="font-size:12px;">'+esc([...pSet].join('、'))+'</td>'
           +'<td colspan="2" style="color:var(--text-muted);text-align:center;">—</td>'
           +'<td style="text-align:center;">'+totalMD+'</td>'
-          +'<td style="color:var(--text-muted);">—</td>'
+          +'<td style="text-align:right;">'+(items[0].order.quote?fmtMoney(items[0].order.quote):'—')+'</td>'
           +'<td style="text-align:right;"><span class="cost-value">'+fmtMoney(totalCost)+'</span></td>'
           +'<td style="text-align:right;color:var(--accent2);font-weight:900;">'+fmtMoney(Math.ceil(totalCost/0.85))+'</td>'
           +'<td colspan="5" style="color:var(--text-muted);font-size:12px;">合計 '+items.length+' 次派工</td>'
           +'</tr>';
       }
-      items.forEach(item=>html+=buildOrderRow(item.order,item.index,dailyRate,now,true,orders));
+      items.forEach(item=>{
+        let row=buildOrderRow(item.order,item.index,dailyRate,now,true,orders);
+        if(items.length===1&&calcOwnCost(item.order,now,dailyRate).total<200000){
+          row=row.replace('<tr class="completed-row"','<tr class="completed-row cost-low"');
+        }
+        html+=row;
+      });
     });
     completedBody.innerHTML=html;
   }else completedSection.classList.add('hidden');
