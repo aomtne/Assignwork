@@ -447,7 +447,7 @@ function renderPersonnelGrid(){
   document.getElementById('personnel-grid').innerHTML=personnelData.map(p=>{
     if(search&&!p.name.includes(search))return'';
     let disabled=false,levelInfo='';
-    if(methods.length>0){disabled=methods.every(m=>p[m]===0);levelInfo=methods.map(m=>{const lv=p[m];const lbl=lv===3?'III':lv===2?'II':lv===1?'I':'—';return'<span class="badge badge-'+lv+'" style="font-size:10px;padding:1px 6px;">'+m+':'+lbl+'</span>';}).join(' ');}
+    if(methods.length>0){levelInfo=methods.map(m=>{const lv=p[m];const lbl=lv===3?'III':lv===2?'II':lv===1?'I':'—';return'<span class="badge badge-'+lv+'" style="font-size:10px;padding:1px 6px;">'+m+':'+lbl+'</span>';}).join(' ');}
     return'<div class="personnel-item '+(selectedPersonnel.has(p.id)?'selected':'')+' '+(disabled?'disabled':'')+'" onclick="togglePerson('+p.id+')">'
       +'<input type="checkbox" '+(selectedPersonnel.has(p.id)?'checked ':'')+''+(disabled?'disabled ':'')+'/>'
       +'<span class="name">'+p.name+'</span><span class="level" style="display:flex;gap:3px;flex-wrap:wrap;">'+levelInfo+'</span></div>';
@@ -501,7 +501,16 @@ function submitDispatch(){
   const newOrder={workId,projectName,method:methods.join('+'),methods,personnel:names,personnelIds:[...selectedPersonnel],
     startDate,endDate,manDays:days*selected.length,manDaysOverride:false,
     processControl:false,report:false,completed:false,year:start.getFullYear(),
-    maintainer:user?user.account:'',laborCosts:[],materialCosts:[]};
+    maintainer:user?user.account:'',laborCosts:[],materialCosts:[],
+    createdAt:Date.now()};
+  // 防止重複：相同工號＋項目＋人員，且3分鐘內建立的視為重複，直接略過
+  const sortedNew=[...names].sort().join(',');
+  const isDup=orders.some(o=>{
+    if(o.workId!==workId||o.projectName!==projectName)return false;
+    if([...(o.personnel||[])].sort().join(',')!==sortedNew)return false;
+    return(Date.now()-(o.createdAt||0))<180000;
+  });
+  if(isDup){showToast('⚠ 偵測到重複派工（3分鐘內相同資料），已略過','warn');clearForm();return;}
   orders.push(newOrder);saveWorkOrders(orders);syncDispatchToSheet(newOrder);
   showToast('工號 '+workId+' 派工完成！已派 '+names.length+' 人，'+methods.join('+')+' 檢測');
   clearForm();
@@ -519,6 +528,7 @@ function saveDailyRate(val){const n=parseInt(String(val).replace(/[,，\s]/g,'')
 function initDailyRate(){document.getElementById('daily-rate').value=getDailyRate().toLocaleString();}
 function parseMoney(val){return parseInt(String(val).replace(/[,，\s$NT]/g,''))||0;}
 function fmtMoney(n){return n.toLocaleString();}
+function fmtDate(d){if(!d)return'—';return String(d).slice(0,10);}
 
 // ─── 備註項目正規化 ───
 function parseLaborItem(v){
@@ -599,8 +609,8 @@ function buildOrderRow(o,i,dailyRate,now,isCompletedRow,allOrders){
       +'<td>'+esc(o.projectName)+'</td>'
       +'<td><span class="badge badge-2">'+esc(o.method)+'</span></td>'
       +'<td style="font-size:12px;">'+personnelStr+'</td>'
-      +'<td>'+esc(o.startDate)+'</td>'
-      +'<td>'+esc(o.endDate)+'</td>'
+      +'<td>'+fmtDate(o.startDate)+'</td>'
+      +'<td>'+fmtDate(o.endDate)+'</td>'
       +'<td style="text-align:center;font-weight:700;">'+o.manDays+(o.manDaysOverride?' <span title="手動設定" style="color:var(--warn);font-size:10px;">✎</span>':'')+'</td>'
       +'<td style="text-align:right;">'+(quote?fmtMoney(quote):'')+'</td>'
       +'<td style="text-align:right;"><span class="cost-value">'+fmtMoney(own.total)+'</span></td>'
@@ -631,8 +641,8 @@ function buildOrderRow(o,i,dailyRate,now,isCompletedRow,allOrders){
     +'<td>'+esc(o.projectName)+'</td>'
     +'<td><span class="badge badge-2">'+esc(o.method)+'</span></td>'
     +'<td style="font-size:12px;">'+personnelStr+'</td>'
-    +'<td><input type="date" class="date-input-inline" value="'+o.startDate+'" onchange="updateOrderDate('+i+',\'startDate\',this.value)"></td>'
-    +'<td><input type="date" class="date-input-inline" value="'+o.endDate+'" onchange="updateOrderDate('+i+',\'endDate\',this.value)"></td>'
+    +'<td><input type="date" class="date-input-inline" value="'+fmtDate(o.startDate)+'" onchange="updateOrderDate('+i+',\'startDate\',this.value)"></td>'
+    +'<td><input type="date" class="date-input-inline" value="'+fmtDate(o.endDate)+'" onchange="updateOrderDate('+i+',\'endDate\',this.value)"></td>'
     +'<td style="text-align:center;"><input class="mandays-input '+(o.manDaysOverride?'mandays-override':'')+'" value="'+o.manDays+'" title="'+(o.manDaysOverride?'手動設定（橘框）':'自動計算，可手動覆寫')+'" onblur="updateManDays('+i+',this.value);" onkeydown="if(event.key===\'Enter\')this.blur();"></td>'
     +'<td><input class="cost-input" value="'+(quote?fmtMoney(quote):'')+'" placeholder="輸入報價" onblur="updateQuote('+i+',this.value);renderWorklog();"></td>'
     +'<td style="min-width:160px;"><div style="font-size:11px;color:var(--text-dim);margin-bottom:2px;">基本：'+fmtMoney(own.laborBase)+'</div>'+laborItems+'<button class="cost-add-btn" onclick="addLaborCost('+i+')">＋ 新增人力</button></td>'
