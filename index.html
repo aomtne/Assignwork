@@ -218,6 +218,13 @@
   <div class="suggestion-box hidden" id="suggestion-box">
     <h3>💡 系統建議派工人員</h3>
     <div id="suggestion-list"></div>
+    <div id="available-section" style="margin-top:14px;display:none;">
+      <div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span>🟢 可供派用人員</span>
+        <span id="available-count" style="font-size:11px;font-weight:400;color:var(--text-muted);"></span>
+      </div>
+      <div id="available-list" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+    </div>
     <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">※ Level II 以上人員優先，並確保每組至少有一名 Level II+ 帶領 Level I 或無證照人員</p>
   </div>
   <div class="card" id="personnel-select-card" style="margin-top:20px;">
@@ -471,27 +478,53 @@ function getPersonnelSupportCounts(){
 }
 
 // 從人資摘要 GAS 查詢指定日期區間內已有派工的人員
+// 人資摘要專用 GAS（NDT 人力運用 Google Sheet）
+const HR_GAS_URL='https://script.google.com/macros/s/AKfycby0oIervhkmGpopOo12Bd43OuuMVc5T5kIPAA_QqZDwVU-M-QAN-86VlUeCZo5r-eoB6Q/exec';
+
+// 從人資摘要 GAS 查詢指定日期區間內已有派工的人員姓名集合
+// 回傳 Set<string>（姓名），或 null（查詢失敗）
 async function fetchBusyPersonnel(startDate, endDate){
-  const gasUrl=getGasUrl();
-  if(!gasUrl) return null;
   try{
-    const url=gasUrl+'?action=getAllAssignments&t='+Date.now();
+    const url=HR_GAS_URL+'?action=getAllAssignments&t='+Date.now();
+    console.log('[fetchBusyPersonnel] 查詢 URL:', url);
     const res=await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
     const json=await res.json();
+
+    // ── DEBUG：印出原始回傳，幫助確認欄位名稱 ──
+    console.log('[fetchBusyPersonnel] 原始回傳 keys:', Object.keys(json));
     const list=json.assignments||json.data||[];
+    console.log('[fetchBusyPersonnel] 派工總筆數:', list.length);
+    if(list.length>0) console.log('[fetchBusyPersonnel] 第1筆樣本:', JSON.stringify(list[0]));
+
     const busy=new Set();
     list.forEach(a=>{
-      const s=(a.start||a.startDate||'').slice(0,10);
-      const e=(a.end||a.endDate||'').slice(0,10);
+      // 相容多種欄位名稱，取 yyyy-MM-dd 前10碼（處理含時區的 ISO 字串）
+      const rawS = a.start||a.startDate||a.Start||a.StartDate||'';
+      const rawE = a.end  ||a.endDate  ||a.End  ||a.EndDate  ||'';
+      const s = rawS.slice(0,10);
+      const e = rawE.slice(0,10);
       if(!s||!e) return;
+      // 日期重疊：派工結束 >= 查詢開始 且 派工開始 <= 查詢結束
       if(s<=endDate && e>=startDate){
-        const name=a.person||a.name||'';
+        const name=a.person||a.name||a.Person||a.Name||'';
         if(name) busy.add(name);
       }
     });
+    console.log('[fetchBusyPersonnel] '+startDate+'~'+endDate+' 已有派工人員('+busy.size+'):', [...busy]);
     return busy;
-  }catch(e){console.warn('fetchBusyPersonnel failed:',e);return null;}
+  }catch(e){
+    console.warn('[fetchBusyPersonnel] 查詢失敗，改為僅依出工次數排序:', e.message);
+    return null;
+  }
 }
+
+// ── 開放給 console 手動測試用 ──
+window._debugFetchBusy = async function(s, e){
+  const result = await fetchBusyPersonnel(s||'2026-06-25', e||'2026-06-26');
+  console.table([...( result || new Set())].map(n=>({姓名:n})));
+  return result;
+};
 
 async function generateSuggestion(){
   const methods=getSelectedMethods();
@@ -564,6 +597,38 @@ async function generateSuggestion(){
     if(!suggested.some(p=>p.minLevel>=2)){
       list.innerHTML+='<p style="color:var(--danger);font-size:13px;margin-top:8px;">⚠ 找不到符合資格的 Level II 人員</p>';
     }
+  }
+
+  // ── 可供派用人員（有資格 + 空閒 + 不在建議名單中）──
+  const suggestedIds=new Set(suggested.map(p=>p.id));
+  const availableSection=document.getElementById('available-section');
+  const availableList=document.getElementById('available-list');
+  const availableCount=document.getElementById('available-count');
+
+  // 只有在能查到空閒狀態時才顯示（busySet !== null）
+  if(busySet!==null){
+    // 有資格、空閒、且不在建議名單中的人員（依出工次數排序）
+    const available=qualified.filter(p=>p.isFree && !suggestedIds.has(p.id)).sort(sortFn);
+    if(available.length>0){
+      availableCount.textContent='（共 '+available.length+' 位，依出工次數排序）';
+      availableList.innerHTML=available.map(p=>{
+        const cls=p.minLevel===3?'badge-3':p.minLevel===2?'badge-2':'badge-1';
+        const lbl=p.minLevel===3?'III':p.minLevel===2?'II':'I';
+        const countLabel=p.id>=9?p.supportCount+'次':'—';
+        const isL2Plus=p.minLevel>=2;
+        return '<span class="suggestion-tag" style="opacity:0.85;'+(isL2Plus?'border-color:rgba(16,185,129,0.35);':'')+'">'
+          +'<span class="badge '+cls+'">'+lbl+'</span>'
+          +' '+p.name
+          +(isL2Plus?' <span style="font-size:10px;color:var(--success);">★II</span>':'')
+          +'<span style="font-size:11px;color:var(--text-muted);margin-left:2px;">('+countLabel+')</span>'
+          +'</span>';
+      }).join('');
+      availableSection.style.display='';
+    } else {
+      availableSection.style.display='none';
+    }
+  } else {
+    availableSection.style.display='none';
   }
 
   box.classList.remove('hidden');
